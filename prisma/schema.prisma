@@ -17,4 +17,35 @@ datasource db {
 
 model User {
   id  String  @id @default(uuid())
+  email String @unique
+  name String?
+  image String?
+  preference Preference?
+  messageSent Message[] @relation("sentMessages")
+  messagesRec Message[] @relation("receivedMessages")
+}
+
+model Preference {
+  id String @id @default(uuid())
+  userId String @unique
+  location String 
+  gender String
+  occupation String
+  preferences Json
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Message{
+  id String @id @default(uuid())
+  senderId String
+  receiverId String 
+  content String
+  createdAt DateTime @default(now())
+  read Boolean @default(false)
+
+  sender User @relation("sentMessages", fields:[senderId], references: [id])
+  receiver User @relation("receivedMessages", fields: [receiverId], references: [id])
+
+  @@index([senderId])
+  @@index([receiverId])
 }
