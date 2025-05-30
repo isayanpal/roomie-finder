@@ -19,7 +19,7 @@ export default async function Home() {
     );
   }
 
-  console.log(session);
+  // console.log(session);
 
   const {
     data: {
@@ -51,6 +51,9 @@ export default async function Home() {
       <Button variant={"destructive"} onClick={signout}>
         Logout
       </Button>
+      <Link href={"/preferences"}>
+        <Button>Preferences</Button>
+      </Link>
     </div>
   );
 }

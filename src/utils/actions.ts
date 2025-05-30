@@ -14,7 +14,7 @@ const signInWith = (provider: any) => async () => {
       redirectTo: auth_callback_url,
     },
   });
-  console.log(data);
+  // console.log(data);
 
   if (error) {
     console.log(error);
