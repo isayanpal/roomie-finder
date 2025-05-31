@@ -32,6 +32,9 @@ model Preference {
   gender String
   occupation String
   preferences Json
+
+  userName String?
+  userImage String?
   user User @relation(fields: [userId], references: [id])
 }
 

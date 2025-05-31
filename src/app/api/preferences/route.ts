@@ -13,6 +13,7 @@ export async function GET() {
     where: {
       userId: session.user.id,
     },
+    include: { user: { select: { name: true, image: true } } },
   });
   return NextResponse.json(
     pref || {
@@ -20,6 +21,8 @@ export async function GET() {
       gender: "",
       occupation: "",
       preferences: { cleanliness: "", nightOwl: "", smoker: "" },
+      userName: "",
+      userImage: "",
     }
   );
 }
@@ -33,15 +36,34 @@ export async function POST(req: Request) {
   } = await supabase.auth.getSession();
   if (!session) return NextResponse.json(null, { status: 401 });
 
+  // Fetch the user's name and image from the User model
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { name: true, image: true },
+  });
+
+  if (!user) {
+    return NextResponse.json({ error: "User not found" }, { status: 404 });
+  }
+
   const p = await prisma.preference.upsert({
     where: { userId: session.user.id },
-    update: { location, gender, occupation, preferences },
+    update: {
+      location,
+      gender,
+      occupation,
+      preferences,
+      userName: user.name ?? "",
+      userImage: user.image ?? "",
+    },
     create: {
       userId: session.user.id,
       location,
       gender,
       occupation,
       preferences,
+      userName: user.name ?? "",
+      userImage: user.image ?? "",
     },
   });
   return NextResponse.json(p);

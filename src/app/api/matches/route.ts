@@ -2,9 +2,9 @@ import prisma from "@/lib/prisma";
 import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 
-const supabase = await createClient();
 
 export async function GET(){
+    const supabase = await createClient();
     const {data: {session}} = await supabase.auth.getSession();
     if(!session) return NextResponse.json(null,{status:401});
 
