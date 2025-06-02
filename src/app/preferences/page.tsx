@@ -1,224 +1,335 @@
-"use client";
+"use client"
 
-import { Button } from "@/components/ui/button";
-import { createClient } from "@/utils/supabase/client";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import type React from "react"
+
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { createClient } from "@/utils/supabase/client"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
+import toast from "react-hot-toast"
+import { ArrowLeft, MapPin, User, Briefcase, Home, Moon, Cigarette, Save } from "lucide-react"
+import { MdCleaningServices } from "react-icons/md";
 
 interface Preferences {
-  cleanliness: string;
-  nightOwl: string;
-  smoker: string;
+  cleanliness: string
+  nightOwl: string
+  smoker: string
 }
 
 interface FormData {
-  location: string;
-  gender: string;
-  occupation: string;
-  preferences: Preferences;
+  location: string
+  gender: string
+  occupation: string
+  preferences: Preferences
 }
 
 export default function PreferencesPage() {
-  const supabase = createClient();
-  const router = useRouter();
+  const supabase = createClient()
+  const router = useRouter()
   const [form, setForm] = useState<FormData>({
     location: "",
     gender: "",
     occupation: "",
     preferences: { cleanliness: "", nightOwl: "", smoker: "" },
-  });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  })
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const loadPreferences = async () => {
-      setLoading(true);
-      setError(null);
+      setLoading(true)
+      setError(null)
       try {
         const {
           data: { user },
-          error: userError,
-        } = await supabase.auth.getUser();
-        if (userError) {
-          console.error("Supabase user fetch error:", userError.message);
-          setError(
-            "Failed to fetch user session. Please try logging in again."
-          );
-          router.push("/"); // Redirect on error
-          return;
-        }
-        if (!user) return router.push("/auth");
+        } = await supabase.auth.getUser()
+        if (!user) return router.push("/auth")
 
         // load existing prefs
-        const res = await fetch("/api/preferences");
+        const res = await fetch("/api/preferences")
         if (res.ok) {
-          const p: FormData = await res.json();
+          const p: FormData = await res.json()
           setForm({
             location: p.location || "",
             gender: p.gender || "",
             occupation: p.occupation || "",
-            // Ensure preferences object and its properties exist, fallback to empty
             preferences: {
               cleanliness: p.preferences?.cleanliness || "",
               nightOwl: p.preferences?.nightOwl || "",
               smoker: p.preferences?.smoker || "",
             },
-          });
+          })
         } else if (res.status === 401) {
-          // If the API says unauthorized (session expired etc.)
-          setError("Session expired or unauthorized. Please log in again.");
-          router.push("/");
+          setError("Session expired or unauthorized. Please log in again.")
+          router.push("/auth")
         } else {
-          const errorData = await res.json();
-          setError(
-            `Failed to load preferences: ${errorData.error || res.statusText}`
-          );
-          console.error("Failed to load preferences:", errorData);
+          const errorData = await res.json()
+          setError(`Failed to load preferences: ${errorData.error || res.statusText}`)
+          console.error("Failed to load preferences:", errorData)
         }
       } catch (err: any) {
-        console.error("Error loading preferences:", err);
-        setError(`An unexpected error occurred: ${err.message}`);
+        console.error("Error loading preferences:", err)
+        setError(`An unexpected error occurred: ${err.message}`)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    loadPreferences();
-  }, [router]);
+    loadPreferences()
+  }, [router])
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
+  const handleInputChange = (name: string, value: string) => {
     if (["cleanliness", "nightOwl", "smoker"].includes(name)) {
       setForm((f) => ({
         ...f,
         preferences: { ...f.preferences, [name]: value },
-      }));
+      }))
     } else {
-      setForm((f) => ({ ...f, [name]: value }));
+      setForm((f) => ({ ...f, [name]: value }))
     }
-  };
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+    e.preventDefault()
+    setSaving(true)
     try {
       const res = await fetch("/api/preferences", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
-      });
+      })
 
       if (res.ok) {
-        alert("Preferences saved!");
-        router.push("/match");
+        toast.success("Preferences saved successfully!")
+        router.push("/match")
       } else if (res.status === 401) {
-        // If the API says unauthorized (session expired etc.)
-        alert("Session expired or unauthorized. Please log in again.");
-        router.push("/");
+        toast.error("Session expired or unauthorized. Please log in again.")
+        router.push("/auth")
       } else {
-        const errorData = await res.json();
-        alert(
-          `Failed to save preferences: ${errorData.error || res.statusText}`
-        );
-        console.error("Failed to save preferences:", errorData);
+        const errorData = await res.json()
+        toast.error(`Failed to save preferences: ${errorData.error || res.statusText}`)
+        console.error("Failed to save preferences:", errorData)
       }
     } catch (err: any) {
-      console.error("Error saving preferences:", err);
-      alert(`An unexpected error occurred while saving: ${err.message}`);
+      console.error("Error saving preferences:", err)
+      toast.error(`An unexpected error occurred while saving: ${err.message}`)
+    } finally {
+      setSaving(false)
     }
-  };
+  }
 
   if (loading) {
     return (
-      <div className="max-w-md mx-auto p-6 text-center">
-        Loading preferences...
+      <div className="min-h-screen bg-[#fbf9f1] flex items-center justify-center">
+        <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-[#ebd98d]/30">
+          <div className="flex items-center gap-3">
+            <div className="w-6 h-6 border-2 border-[#d2b53b] border-t-transparent rounded-full animate-spin" />
+            <span className="text-[#100e06]">Loading your preferences...</span>
+          </div>
+        </div>
       </div>
-    );
+    )
   }
 
   if (error) {
     return (
-      <div className="max-w-md mx-auto p-6 text-center text-red-500">
-        {error}
+      <div className="min-h-screen bg-[#fbf9f1] flex items-center justify-center p-6">
+        <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-red-200 max-w-md w-full text-center">
+          <div className="text-red-600 mb-4">{error}</div>
+          <Link href="/auth">
+            <Button className="bg-[#d2b53b] hover:bg-[#d2b53b]/90 text-white">Go to Login</Button>
+          </Link>
+        </div>
       </div>
-    );
+    )
   }
+
   return (
-    <div className="flex flex-col justify-center items-center gap-5">
-      <div className="max-w-md mx-auto bg-white p-6 rounded shadow">
-        <h2 className="text-xl font-bold mb-4">Your Preferences</h2>
-        <form className="space-y-3" onSubmit={handleSubmit}>
-          {/* ... (input and select elements remain the same) ... */}
-          <input
-            name="location"
-            value={form.location}
-            onChange={handleChange}
-            placeholder="City"
-            className="w-full border px-3 py-2 rounded"
-          />
-          <select
-            name="gender"
-            value={form.gender}
-            onChange={handleChange}
-            className="w-full border px-3 py-2 rounded"
+    <div className="min-h-screen bg-[#fbf9f1] p-6">
+      {/* Background decorative elements */}
+      <div className="absolute top-20 left-10 w-32 h-32 bg-[#ebd98d]/20 rounded-full blur-2xl" />
+      <div className="absolute bottom-20 right-10 w-40 h-40 bg-[#ebd060]/15 rounded-full blur-2xl" />
+      <div className="absolute top-1/2 right-1/4 w-24 h-24 bg-[#d2b53b]/10 rounded-full blur-xl" />
+
+      <div className="max-w-2xl mx-auto relative">
+        {/* Header */}
+        <div className="mb-8">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-[#100e06]/70 hover:text-[#100e06] transition-colors mb-6 group"
           >
-            <option value="">Gender</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-            <option value="non-binary">Non-Binary</option>
-            <option value="prefer-not-say">Prefer not to say</option>
-          </select>
-          <input
-            name="occupation"
-            value={form.occupation}
-            onChange={handleChange}
-            placeholder="Occupation"
-            className="w-full border px-3 py-2 rounded"
-          />
-          <select
-            name="cleanliness"
-            value={form.preferences.cleanliness}
-            onChange={handleChange}
-            className="w-full border px-3 py-2 rounded"
-          >
-            <option value="">Cleanliness</option>
-            <option value="neat">Neat</option>
-            <option value="average">Average</option>
-            <option value="messy">Messy</option>
-          </select>
-          <select
-            name="nightOwl"
-            value={form.preferences.nightOwl}
-            onChange={handleChange}
-            className="w-full border px-3 py-2 rounded"
-          >
-            <option value="">Night owl?</option>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
-          </select>
-          <select
-            name="smoker"
-            value={form.preferences.smoker}
-            onChange={handleChange}
-            className="w-full border px-3 py-2 rounded"
-          >
-            <option value="">Smoker?</option>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
-          </select>
-          <button
-            type="submit"
-            className="w-full bg-green-600 text-white py-2 rounded"
-          >
-            Save & Continue
-          </button>
-        </form>
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            Back to Home
+          </Link>
+
+          <div className="text-center">
+            <h1 className="text-3xl md:text-4xl font-bold text-[#100e06] mb-2">
+              Set Your <span className="text-[#d2b53b]">Preferences</span>
+            </h1>
+            <p className="text-[#100e06]/70">Help us find your perfect roommate match</p>
+          </div>
+        </div>
+
+        {/* Main Form */}
+        <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-[#ebd98d]/30">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Basic Information */}
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold text-[#100e06] flex items-center gap-2">
+                <User className="w-5 h-5 text-[#d2b53b]" />
+                Basic Information
+              </h2>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="location" className="text-[#100e06] font-medium flex items-center gap-2">
+                    <MapPin className="w-4 h-4" />
+                    Location
+                  </Label>
+                  <Input
+                    id="location"
+                    name="location"
+                    value={form.location}
+                    onChange={(e) => handleInputChange("location", e.target.value)}
+                    placeholder="Enter your city"
+                    className="bg-white/50 border-[#ebd98d]/50 focus:border-[#d2b53b] rounded-xl"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="gender" className="text-[#100e06] font-medium">
+                    Gender
+                  </Label>
+                  <Select value={form.gender} onValueChange={(value) => handleInputChange("gender", value)}>
+                    <SelectTrigger className="bg-white/50 border-[#ebd98d]/50 focus:border-[#d2b53b] rounded-xl">
+                      <SelectValue placeholder="Select gender" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="male">Male</SelectItem>
+                      <SelectItem value="female">Female</SelectItem>
+                      <SelectItem value="non-binary">Non-Binary</SelectItem>
+                      <SelectItem value="prefer-not-say">Prefer not to say</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="occupation" className="text-[#100e06] font-medium flex items-center gap-2">
+                  <Briefcase className="w-4 h-4" />
+                  Occupation
+                </Label>
+                <Input
+                  id="occupation"
+                  name="occupation"
+                  value={form.occupation}
+                  onChange={(e) => handleInputChange("occupation", e.target.value)}
+                  placeholder="What do you do for work?"
+                  className="bg-white/50 border-[#ebd98d]/50 focus:border-[#d2b53b] rounded-xl"
+                />
+              </div>
+            </div>
+
+            {/* Lifestyle Preferences */}
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold text-[#100e06] flex items-center gap-2">
+                <Home className="w-5 h-5 text-[#d2b53b]" />
+                Lifestyle Preferences
+              </h2>
+
+              <div className="grid md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="cleanliness" className="text-[#100e06] font-medium flex items-center gap-2">
+                    <MdCleaningServices className="w-4 h-4" />
+                    Cleanliness Level
+                  </Label>
+                  <Select
+                    value={form.preferences.cleanliness}
+                    onValueChange={(value) => handleInputChange("cleanliness", value)}
+                  >
+                    <SelectTrigger className="bg-white/50 border-[#ebd98d]/50 focus:border-[#d2b53b] rounded-xl">
+                      <SelectValue placeholder="Select level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="neat">Very Neat</SelectItem>
+                      <SelectItem value="average">Average</SelectItem>
+                      <SelectItem value="messy">Relaxed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="nightOwl" className="text-[#100e06] font-medium flex items-center gap-2">
+                    <Moon className="w-4 h-4" />
+                    Night Owl?
+                  </Label>
+                  <Select
+                    value={form.preferences.nightOwl}
+                    onValueChange={(value) => handleInputChange("nightOwl", value)}
+                  >
+                    <SelectTrigger className="bg-white/50 border-[#ebd98d]/50 focus:border-[#d2b53b] rounded-xl">
+                      <SelectValue placeholder="Select option" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="yes">Yes, I stay up late</SelectItem>
+                      <SelectItem value="no">No, I sleep early</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="smoker" className="text-[#100e06] font-medium flex items-center gap-2">
+                    <Cigarette className="w-4 h-4" />
+                    Smoker?
+                  </Label>
+                  <Select value={form.preferences.smoker} onValueChange={(value) => handleInputChange("smoker", value)}>
+                    <SelectTrigger className="bg-white/50 border-[#ebd98d]/50 focus:border-[#d2b53b] rounded-xl">
+                      <SelectValue placeholder="Select option" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="yes">Yes</SelectItem>
+                      <SelectItem value="no">No</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <div className="pt-4">
+              <Button
+                type="submit"
+                disabled={saving}
+                className="w-full bg-[#d2b53b] hover:bg-[#d2b53b]/90 text-white rounded-xl py-6 text-lg font-semibold"
+              >
+                {saving ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Saving Preferences...
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Save className="w-5 h-5" />
+                    Save & Find Matches
+                  </div>
+                )}
+              </Button>
+            </div>
+          </form>
+        </div>
+
+        {/* Alternative Navigation */}
+        <div className="mt-6 text-center">
+          <Link href="/match" className="text-[#d2b53b] hover:text-[#d2b53b]/80 font-medium">
+            Skip for now and browse matches →
+          </Link>
+        </div>
       </div>
-      <Link href={"/match"}>
-        <Button>Find Your Matches</Button>
-      </Link>
     </div>
-  );
+  )
 }
