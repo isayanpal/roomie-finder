@@ -1,36 +1,29 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Roomie Finder
 
-## Getting Started
+A smart roommate-matching platform designed specifically for students and working professionals. It connects users based on key criteria such as shared interests, gender, and preferred location where they want to shift/live. The app also includes a built-in chat system, enabling users to communicate, discuss potential living arrangements, and build rapport before making any commitments. Whether you're relocating for education or career opportunities, our platform makes it easier to find a compatible and trustworthy roommate.
 
-First, run the development server:
+### Deployed Link - https://roomie-finder-v0.vercel.app/
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+<img src="images/1.png">
+<img src="images/2.png">
+<img src="images/3.png">
+<img src="images/4.png">
+<img src="images/5.png">
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+* **Smart Roommate Matching:** Connect with compatible roommates based on shared interests, gender, lifestyle choices, and preferred living locations.
+* **User Profiles and Preferences:** Create detailed profiles and update roommate preferences anytime for accurate and personalized matches.
+* **Match Listing Interface:** View a curated list of potential roommates that align with your specified criteria.
+* **Built-in Chat System:** Communicate directly within the platform to discuss living arrangements and get to know potential roommates before making any commitments.
+* **Google Sign-In:** Secure and convenient authentication using your Google account.
+* **Real-Time Notifications:** Receive instant updates on new matches and incoming messages to stay engaged and responsive.
+* **Designed for Students and Professionals:** Specifically built to support the unique needs of individuals relocating for education or career opportunities.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## Learn More
+## Technologies Used
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+* **Next.js:** A React framework for building server-rendered and statically generated web applications.
+* **TypeScript:** A statically typed superset of JavaScript that enhances code maintainability and reduces errors.
+* **Supabase:** An open-source Firebase alternative that provides a PostgreSQL database, authentication, storage, and more.
+* **Shadcn UI:** A collection of accessible and reusable UI primitives built with Radix UI and Tailwind CSS.
