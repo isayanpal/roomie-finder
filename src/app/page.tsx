@@ -54,7 +54,7 @@ export default function Home() {
         <div className="text-center py-16 max-w-3xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to find your perfect roommate?</h2>
           <p className="text-lg text-[#100e06]/70 mb-8">
-            Join thousands of happy users who found their ideal living situation through RoomMate.
+            Join thousands of happy users who found their ideal living situation through Roomie Finder.
           </p>
           <Link href="/preferences">
             <Button
