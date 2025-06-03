@@ -15,16 +15,40 @@ export async function GET() {
     },
     include: { user: { select: { name: true, image: true } } },
   });
-  return NextResponse.json(
-    pref || {
+ // Handle case where no preferences exist
+  if (!pref) {
+    return NextResponse.json({
       location: "",
       gender: "",
       occupation: "",
       preferences: { cleanliness: "", nightOwl: "", smoker: "" },
       userName: "",
       userImage: "",
-    }
-  );
+    });
+  }
+
+    // Cast preferences from Prisma.JsonValue to expected object
+  const preferences = pref.preferences as {
+    cleanliness?: string;
+    nightOwl?: string;
+    smoker?: string;
+  };
+
+  // Normalize values to lowercase safely
+  const cleaned = {
+    location: pref.location?.toLowerCase() || "",
+    gender: pref.gender?.toLowerCase() || "",
+    occupation: pref.occupation?.toLowerCase() || "",
+    preferences: {
+      cleanliness: preferences?.cleanliness || "",
+      nightOwl: preferences?.nightOwl || "",
+      smoker: preferences?.smoker || "",
+    },
+    userName: pref.user?.name || "",
+    userImage: pref.user?.image || "",
+  };
+
+  return NextResponse.json(cleaned);
 }
 
 export async function POST(req: Request) {

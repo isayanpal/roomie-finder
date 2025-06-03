@@ -16,13 +16,19 @@ export async function GET(){
     if(!pref) return NextResponse.json([],{status:200});
 
     // same gender & location
-    const others = await prisma.preference.findMany({
-        where: {
-            gender: pref.gender,
-            location: pref.location,
-            NOT : {userId: session.user.id}
-        }
-    });
+  const others = await prisma.preference.findMany({
+    where: {
+      NOT: { userId: session.user.id },
+      gender: {
+        equals: pref.gender,
+        mode: "insensitive"
+      },
+      location: {
+        equals: pref.location,
+        mode: "insensitive"
+      }
+    }
+  });
 
     return NextResponse.json(others);
 }
