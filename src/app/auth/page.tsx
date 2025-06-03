@@ -25,7 +25,7 @@ export default function Auth() {
           {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-[#100e06] mb-2">
-              Welcome to <span className="text-[#d2b53b]">Room Finder</span>
+              Welcome to <span className="text-[#d2b53b]">Roomie Finder</span>
             </h1>
             <p className="text-[#100e06]/70">
               Sign in to find your perfect roommate
