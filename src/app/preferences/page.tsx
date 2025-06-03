@@ -13,6 +13,7 @@ import { useEffect, useState } from "react"
 import toast from "react-hot-toast"
 import { ArrowLeft, MapPin, User, Briefcase, Home, Moon, Cigarette, Save } from "lucide-react"
 import { MdCleaningServices } from "react-icons/md";
+import { IoMdPerson } from "react-icons/io";
 
 interface Preferences {
   cleanliness: string
@@ -94,34 +95,49 @@ export default function PreferencesPage() {
     }
   }
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setSaving(true)
-    try {
-      const res = await fetch("/api/preferences", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      })
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault()
 
-      if (res.ok) {
-        toast.success("Preferences saved successfully!")
-        router.push("/match")
-      } else if (res.status === 401) {
-        toast.error("Session expired or unauthorized. Please log in again.")
-        router.push("/auth")
-      } else {
-        const errorData = await res.json()
-        toast.error(`Failed to save preferences: ${errorData.error || res.statusText}`)
-        console.error("Failed to save preferences:", errorData)
-      }
-    } catch (err: any) {
-      console.error("Error saving preferences:", err)
-      toast.error(`An unexpected error occurred while saving: ${err.message}`)
-    } finally {
-      setSaving(false)
-    }
+
+  if (
+    !form.location.trim() ||
+    !form.gender.trim() ||
+    !form.occupation.trim() ||
+    !form.preferences.cleanliness.trim() ||
+    !form.preferences.nightOwl.trim() ||
+    !form.preferences.smoker.trim()
+  ) {
+    toast.error("Please fill in all fields before submitting.")
+    return
   }
+
+  setSaving(true)
+  try {
+    const res = await fetch("/api/preferences", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    })
+
+    if (res.ok) {
+      toast.success("Preferences saved successfully!")
+      router.push("/match")
+    } else if (res.status === 401) {
+      toast.error("Session expired or unauthorized. Please log in again.")
+      router.push("/auth")
+    } else {
+      const errorData = await res.json()
+      toast.error(`Failed to save preferences: ${errorData.error || res.statusText}`)
+      console.error("Failed to save preferences:", errorData)
+    }
+  } catch (err: any) {
+    console.error("Error saving preferences:", err)
+    toast.error(`An unexpected error occurred while saving: ${err.message}`)
+  } finally {
+    setSaving(false)
+  }
+}
+
 
   if (loading) {
     return (
@@ -203,6 +219,7 @@ export default function PreferencesPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="gender" className="text-[#100e06] font-medium">
+                    <IoMdPerson />
                     Gender
                   </Label>
                   <Select value={form.gender} onValueChange={(value) => handleInputChange("gender", value)}>

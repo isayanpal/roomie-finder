@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/custom/Navbar";
 import { Toaster } from "react-hot-toast";
+import { Analytics } from '@vercel/analytics/next';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,6 +33,7 @@ export default function RootLayout({
         <Navbar />
         <Toaster />
         <main className="max-w-7xl mx-auto">{children}</main>
+        <Analytics />
       </body>
     </html>
   );
