@@ -218,8 +218,8 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="gender" className="text-[#100e06] font-medium">
-                    <IoMdPerson />
+                  <Label htmlFor="gender" className="text-[#100e06] font-medium flex items-center gap-2">
+                    <IoMdPerson className="w-4 h-4"/>
                     Gender
                   </Label>
                   <Select value={form.gender} onValueChange={(value) => handleInputChange("gender", value)}>
