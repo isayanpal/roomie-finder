@@ -1,48 +1,49 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { createClient } from "@/utils/supabase/client"
-import Link from "next/link"
-import { ArrowLeft, MessageCircle, Users, Clock } from "lucide-react"
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/utils/supabase/client";
+import Link from "next/link";
+import { ArrowLeft, MessageCircle, Users, Clock } from "lucide-react";
+import { Button } from "../ui/button";
 
 interface User {
-  id: string
-  name: string
-  image: string
-  lastMessage?: string
-  lastMessageTime?: string
+  id: string;
+  name: string;
+  image: string;
+  lastMessage?: string;
+  lastMessageTime?: string;
 }
 
 export default function ChatHistory() {
-  const [users, setUsers] = useState<User[]>([])
-  const [loading, setLoading] = useState(true)
-  const [loggedIn, setLoggedIn] = useState(false)
-  const router = useRouter()
-  const supabase = createClient()
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const router = useRouter();
+  const supabase = createClient();
 
   useEffect(() => {
     const fetchChats = async () => {
       const {
         data: { user },
-      } = await supabase.auth.getUser()
+      } = await supabase.auth.getUser();
       if (!user) {
-        setLoggedIn(false)
-        setLoading(false)
-        return
+        setLoggedIn(false);
+        setLoading(false);
+        return;
       }
 
-      setLoggedIn(true)
-      const res = await fetch("/api/chatHistory")
+      setLoggedIn(true);
+      const res = await fetch("/api/chatHistory");
       if (res.ok) {
-        const data = await res.json()
-        setUsers(data)
+        const data = await res.json();
+        setUsers(data);
       }
-      setLoading(false)
-    }
+      setLoading(false);
+    };
 
-    fetchChats()
-  }, [])
+    fetchChats();
+  }, []);
 
   if (loading) {
     return (
@@ -54,7 +55,7 @@ export default function ChatHistory() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (!loggedIn) {
@@ -64,8 +65,12 @@ export default function ChatHistory() {
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <MessageCircle className="w-8 h-8 text-red-500" />
           </div>
-          <h3 className="text-xl font-semibold text-[#100e06] mb-2">Authentication Required</h3>
-          <p className="text-[#100e06]/70 mb-6">You must be logged in to view your chat history.</p>
+          <h3 className="text-xl font-semibold text-[#100e06] mb-2">
+            Authentication Required
+          </h3>
+          <p className="text-[#100e06]/70 mb-6">
+            You must be logged in to view your chat history.
+          </p>
           <Link
             href="/auth"
             className="inline-flex items-center justify-center bg-[#d2b53b] hover:bg-[#d2b53b]/90 text-white px-6 py-3 rounded-xl font-medium transition-colors"
@@ -74,7 +79,7 @@ export default function ChatHistory() {
           </Link>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -91,8 +96,10 @@ export default function ChatHistory() {
             href="/match"
             className="inline-flex items-center gap-2 text-[#100e06]/70 hover:text-[#100e06] transition-colors mb-6 group"
           >
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            Back to Matches
+            <Button className="bg-[#d2b53b] hover:bg-[#d2b53b]/90 text-white rounded-xl px-4 py-2 flex items-center gap-2">
+              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+              Back to Matches
+            </Button>
           </Link>
 
           <div className="text-center">
@@ -111,9 +118,12 @@ export default function ChatHistory() {
               <div className="w-24 h-24 bg-[#ebd98d]/30 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Users className="w-12 h-12 text-[#d2b53b]" />
               </div>
-              <h3 className="text-xl font-semibold text-[#100e06] mb-2">No Conversations Yet</h3>
+              <h3 className="text-xl font-semibold text-[#100e06] mb-2">
+                No Conversations Yet
+              </h3>
               <p className="text-[#100e06]/70 mb-6">
-                Start chatting with your matches to see your conversation history here.
+                Start chatting with your matches to see your conversation
+                history here.
               </p>
               <Link
                 href="/match"
@@ -133,9 +143,12 @@ export default function ChatHistory() {
                 </div>
                 <div>
                   <p className="font-semibold text-[#100e06]">
-                    {users.length} Active {users.length === 1 ? "Conversation" : "Conversations"}
+                    {users.length} Active{" "}
+                    {users.length === 1 ? "Conversation" : "Conversations"}
                   </p>
-                  <p className="text-sm text-[#100e06]/70">Click on any chat to continue the conversation</p>
+                  <p className="text-sm text-[#100e06]/70">
+                    Click on any chat to continue the conversation
+                  </p>
                 </div>
               </div>
             </div>
@@ -152,7 +165,9 @@ export default function ChatHistory() {
                     {/* Profile Image */}
                     <div className="relative">
                       <img
-                        src={user.image || "/placeholder.svg?height=60&width=60"}
+                        src={
+                          user.image || "/placeholder.svg?height=60&width=60"
+                        }
                         alt={user.name}
                         className="w-14 h-14 rounded-full object-cover ring-2 ring-white shadow-md"
                       />
@@ -171,14 +186,32 @@ export default function ChatHistory() {
                           </div>
                         )}
                       </div>
-                      {user.lastMessage && <p className="text-sm text-[#100e06]/70 truncate">{user.lastMessage}</p>}
-                      {!user.lastMessage && <p className="text-sm text-[#100e06]/50 italic">Continue conversation...</p>}
+                      {user.lastMessage && (
+                        <p className="text-sm text-[#100e06]/70 truncate">
+                          {user.lastMessage}
+                        </p>
+                      )}
+                      {!user.lastMessage && (
+                        <p className="text-sm text-[#100e06]/50 italic">
+                          Continue conversation...
+                        </p>
+                      )}
                     </div>
 
                     {/* Arrow Indicator */}
                     <div className="text-[#d2b53b] group-hover:translate-x-1 transition-transform">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5l7 7-7 7"
+                        />
                       </svg>
                     </div>
                   </div>
@@ -189,8 +222,12 @@ export default function ChatHistory() {
             {/* Bottom CTA */}
             <div className="text-center py-8">
               <div className="bg-white/40 backdrop-blur-sm rounded-2xl p-6 border border-[#ebd98d]/30">
-                <h3 className="text-lg font-semibold text-[#100e06] mb-2">Want to meet more people?</h3>
-                <p className="text-[#100e06]/70 mb-4">Discover more potential roommates and start new conversations.</p>
+                <h3 className="text-lg font-semibold text-[#100e06] mb-2">
+                  Want to meet more people?
+                </h3>
+                <p className="text-[#100e06]/70 mb-4">
+                  Discover more potential roommates and start new conversations.
+                </p>
                 <Link
                   href="/match"
                   className="inline-flex items-center justify-center bg-[#d2b53b] hover:bg-[#d2b53b]/90 text-white px-6 py-3 rounded-xl font-medium transition-colors"
@@ -203,5 +240,5 @@ export default function ChatHistory() {
         )}
       </div>
     </div>
-  )
+  );
 }

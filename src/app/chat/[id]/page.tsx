@@ -35,11 +35,12 @@ export default function ChatRoom() {
         if (!user) return
         setMe(user.id)
 
-        // Fetch other user details (mock)
+        // Fetch other user details
         const userRes = await fetch(`/api/user/${otherId}`)
         if (userRes.ok) {
           const userData = await userRes.json()
           setOtherUser(userData)
+          
         }
 
         // Mark messages as read
@@ -80,7 +81,7 @@ export default function ChatRoom() {
           supabase.removeChannel(channel)
         }
       } catch (error) {
-        console.error("Error in chat initialization:", error)
+        console.log("Error in chat initialization:", error)
       }
     })()
   }, [otherId, supabase, msgs])
@@ -123,9 +124,8 @@ export default function ChatRoom() {
       setIsSending(false)
     }
   }
-
   return (
-    <div className="min-h-screen bg-[#fbf9f1] flex items-center justify-center p-4">
+    <div className="bg-[#fbf9f1] flex items-center justify-center p-4">
       {/* Background decorative elements */}
       <div className="absolute top-20 left-10 w-32 h-32 bg-[#ebd98d]/20 rounded-full blur-2xl" />
       <div className="absolute bottom-20 right-10 w-40 h-40 bg-[#ebd060]/15 rounded-full blur-2xl" />
@@ -151,24 +151,20 @@ export default function ChatRoom() {
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <span className="font-medium text-[#100e06]">Back to Chats</span>
+            <span className="font-medium text-[#100e06] text-[12px]">Back to Chats</span>
           </Link>
 
           {otherUser && (
             <div className="flex items-center gap-2">
               <div className="text-right">
-                <p className="font-medium text-[#100e06]">{otherUser.name}</p>
-                <p className="text-xs text-[#100e06]/60">{otherUser.online ? "Online" : "Offline"}</p>
+                <p className="font-medium text-[#100e06] text-[12px]">{otherUser.name}</p>
               </div>
               <div className="relative">
                 <img
-                  src={otherUser.image || "/placeholder.svg?height=40&width=40"}
+                  src={otherUser.image}
                   alt={otherUser.name}
-                  className="w-10 h-10 rounded-full object-cover ring-2 ring-white"
+                  className="w-8 h-8 rounded-full object-cover ring-2 ring-white"
                 />
-                {otherUser.online && (
-                  <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white"></div>
-                )}
               </div>
             </div>
           )}
