@@ -2,9 +2,16 @@ import prisma from "@/lib/prisma";
 import { createClient } from "@/utils/supabase/server";
 import { NextResponse, NextRequest } from "next/server";
 
+// Define the type for the context object that contains params
+interface Context {
+  params: {
+    id: string; // 'id' matches the folder name [id]
+  };
+}
+
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: Context // Use the defined interface for the second argument
 ) {
   try {
     const supabase = await createClient();
@@ -19,7 +26,7 @@ export async function GET(
       );
     }
 
-    const { id: otherId } = params;
+    const { id: otherId } = context.params; // Access params via the context object
     if (!otherId) {
       return NextResponse.json(
         { message: "User ID is required" },
@@ -27,7 +34,6 @@ export async function GET(
       );
     }
 
-    // Fetch the single user by ID
     const user = await prisma.user.findUnique({
       where: {
         id: otherId,
