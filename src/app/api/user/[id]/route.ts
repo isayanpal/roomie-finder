@@ -1,9 +1,9 @@
 import prisma from "@/lib/prisma";
 import { createClient } from "@/utils/supabase/server";
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 
 export async function GET(
-  request: Request, 
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -34,7 +34,7 @@ export async function GET(
       },
       select: {
         id: true,
-        image:true,
+        image: true,
         email: true,
         name: true,
       },
