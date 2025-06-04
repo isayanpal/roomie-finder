@@ -2,7 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-
+:root{
+    --font-poppins: 'Poppins', sans-serif;
+}
 
 @layer base {
   :root {
@@ -117,5 +119,6 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-poppins), sans-serif;
   }
 }

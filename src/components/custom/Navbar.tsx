@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   Navbar,
@@ -10,20 +10,21 @@ import {
   MobileNavHeader,
   MobileNavToggle,
   MobileNavMenu,
-} from "@/components/ui/resizable-navbar"
-import Link from "next/link"
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { createClient } from "@/utils/supabase/client"
-import NotificationBell from "./NotificationBell"
-import toast from "react-hot-toast"
+} from "@/components/ui/resizable-navbar";
+import Link from "next/link";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/utils/supabase/client";
+import NotificationBell from "./NotificationBell";
+import toast from "react-hot-toast";
+import { Button } from "../ui/button";
 
 export default function NavbarWithAuth() {
-  const router = useRouter()
-  const supabase = createClient()
+  const router = useRouter();
+  const supabase = createClient();
 
-  const [user, setUser] = useState<any | null>(null) // Use specific type if available
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [user, setUser] = useState<any | null>(null); // Use specific type if available
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = user
     ? [
@@ -31,44 +32,48 @@ export default function NavbarWithAuth() {
         { name: "Match", link: "/match" },
         { name: "Chat History", link: "/chat/history" },
       ]
-    : []
+    : [];
 
   useEffect(() => {
     const fetchUser = async () => {
       const {
         data: { session },
         error,
-      } = await supabase.auth.getSession()
+      } = await supabase.auth.getSession();
       if (error) {
-        console.error("Error fetching session:", error.message)
+        console.error("Error fetching session:", error.message);
       }
-      setUser(session?.user || null)
-    }
+      setUser(session?.user || null);
+    };
 
-    fetchUser()
-  }, [])
+    fetchUser();
+  }, []);
 
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut()
+    const { error } = await supabase.auth.signOut();
     if (error) {
-      console.error("Error during sign out:", error.message)
+      console.error("Error during sign out:", error.message);
     } else {
-      setUser(null)
-      toast.success("Logged Out!")
-      router.push("/auth")
+      setUser(null);
+      toast.success("Logged Out!");
+      router.push("/auth");
     }
-  }
+  };
 
   const siginRoute = () => {
-    router.push("/auth")
-  }
+    router.push("/auth");
+  };
+
+  const profileRoute = () => {
+    router.push("/profile");
+  };
 
   return (
-    <div className="relative w-full">
-      <Navbar className="bg-white/60 backdrop-blur-sm border-b border-[#ebd98d]/30">
+    <div className="mt-5 relative w-full">
+      <Navbar>
         {/* Desktop Navigation */}
         <NavBody>
-          <NavbarLogo/>
+          <NavbarLogo />
           <NavItems
             items={navItems}
             className="text-[#100e06]/80 hover:text-[#d2b53b]"
@@ -78,6 +83,12 @@ export default function NavbarWithAuth() {
               <>
                 <NotificationBell />
                 <NavbarButton
+                  onClick={profileRoute}
+                  className="bg-[#d2b53b] hover:bg-[#d2b53b]/90 text-white border-none font-medium"
+                >
+                  Profile
+                </NavbarButton>
+                <NavbarButton
                   onClick={handleLogout}
                   className="bg-[#d2b53b] hover:bg-[#d2b53b]/90 text-white border-none"
                 >
@@ -85,7 +96,10 @@ export default function NavbarWithAuth() {
                 </NavbarButton>
               </>
             ) : (
-              <NavbarButton onClick={siginRoute} className="bg-[#d2b53b] hover:bg-[#d2b53b]/90 text-white border-none">
+              <NavbarButton
+                onClick={siginRoute}
+                className="bg-[#d2b53b] hover:bg-[#d2b53b]/90 text-white border-none"
+              >
                 Sign In
               </NavbarButton>
             )}
@@ -123,9 +137,15 @@ export default function NavbarWithAuth() {
                 <>
                   <NotificationBell />
                   <NavbarButton
+                    onClick={profileRoute}
+                    className="bg-[#d2b53b] hover:bg-[#d2b53b]/90 text-white border-none font-medium"
+                  >
+                    Profile
+                  </NavbarButton>
+                  <NavbarButton
                     onClick={() => {
-                      handleLogout()
-                      setIsMobileMenuOpen(false)
+                      handleLogout();
+                      setIsMobileMenuOpen(false);
                     }}
                     className="w-full bg-[#d2b53b] hover:bg-[#d2b53b]/90 text-white border-none"
                   >
@@ -135,8 +155,8 @@ export default function NavbarWithAuth() {
               ) : (
                 <NavbarButton
                   onClick={() => {
-                    siginRoute()
-                    setIsMobileMenuOpen(false)
+                    siginRoute();
+                    setIsMobileMenuOpen(false);
                   }}
                   className="w-full bg-[#d2b53b] hover:bg-[#d2b53b]/90 text-white border-none"
                 >
@@ -148,5 +168,5 @@ export default function NavbarWithAuth() {
         </MobileNav>
       </Navbar>
     </div>
-  )
+  );
 }

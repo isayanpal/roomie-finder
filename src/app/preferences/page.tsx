@@ -1,60 +1,75 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { createClient } from "@/utils/supabase/client"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
-import toast from "react-hot-toast"
-import { ArrowLeft, MapPin, User, Briefcase, Home, Moon, Cigarette, Save } from "lucide-react"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { createClient } from "@/utils/supabase/client";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import {
+  ArrowLeft,
+  MapPin,
+  User,
+  Briefcase,
+  Home,
+  Moon,
+  Cigarette,
+  Save,
+} from "lucide-react";
 import { MdCleaningServices } from "react-icons/md";
 import { IoMdPerson } from "react-icons/io";
 
 interface Preferences {
-  cleanliness: string
-  nightOwl: string
-  smoker: string
+  cleanliness: string;
+  nightOwl: string;
+  smoker: string;
 }
 
 interface FormData {
-  location: string
-  gender: string
-  occupation: string
-  preferences: Preferences
+  location: string;
+  gender: string;
+  occupation: string;
+  preferences: Preferences;
 }
 
 export default function PreferencesPage() {
-  const supabase = createClient()
-  const router = useRouter()
+  const supabase = createClient();
+  const router = useRouter();
   const [form, setForm] = useState<FormData>({
     location: "",
     gender: "",
     occupation: "",
     preferences: { cleanliness: "", nightOwl: "", smoker: "" },
-  })
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadPreferences = async () => {
-      setLoading(true)
-      setError(null)
+      setLoading(true);
+      setError(null);
       try {
         const {
           data: { user },
-        } = await supabase.auth.getUser()
-        if (!user) return router.push("/auth")
+        } = await supabase.auth.getUser();
+        if (!user) return router.push("/auth");
 
         // load existing prefs
-        const res = await fetch("/api/preferences")
+        const res = await fetch("/api/preferences");
         if (res.ok) {
-          const p: FormData = await res.json()
+          const p: FormData = await res.json();
           setForm({
             location: p.location || "",
             gender: p.gender || "",
@@ -64,80 +79,82 @@ export default function PreferencesPage() {
               nightOwl: p.preferences?.nightOwl || "",
               smoker: p.preferences?.smoker || "",
             },
-          })
+          });
         } else if (res.status === 401) {
-          setError("Session expired or unauthorized. Please log in again.")
-          router.push("/auth")
+          setError("Session expired or unauthorized. Please log in again.");
+          router.push("/auth");
         } else {
-          const errorData = await res.json()
-          setError(`Failed to load preferences: ${errorData.error || res.statusText}`)
-          console.error("Failed to load preferences:", errorData)
+          const errorData = await res.json();
+          setError(
+            `Failed to load preferences: ${errorData.error || res.statusText}`
+          );
+          console.error("Failed to load preferences:", errorData);
         }
       } catch (err: any) {
-        console.error("Error loading preferences:", err)
-        setError(`An unexpected error occurred: ${err.message}`)
+        console.error("Error loading preferences:", err);
+        setError(`An unexpected error occurred: ${err.message}`);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    loadPreferences()
-  }, [router])
+    loadPreferences();
+  }, [router]);
 
   const handleInputChange = (name: string, value: string) => {
     if (["cleanliness", "nightOwl", "smoker"].includes(name)) {
       setForm((f) => ({
         ...f,
         preferences: { ...f.preferences, [name]: value },
-      }))
+      }));
     } else {
-      setForm((f) => ({ ...f, [name]: value }))
+      setForm((f) => ({ ...f, [name]: value }));
     }
-  }
+  };
 
-const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault()
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
-
-  if (
-    !form.location.trim() ||
-    !form.gender.trim() ||
-    !form.occupation.trim() ||
-    !form.preferences.cleanliness.trim() ||
-    !form.preferences.nightOwl.trim() ||
-    !form.preferences.smoker.trim()
-  ) {
-    toast.error("Please fill in all fields before submitting.")
-    return
-  }
-
-  setSaving(true)
-  try {
-    const res = await fetch("/api/preferences", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    })
-
-    if (res.ok) {
-      toast.success("Preferences saved successfully!")
-      router.push("/match")
-    } else if (res.status === 401) {
-      toast.error("Session expired or unauthorized. Please log in again.")
-      router.push("/auth")
-    } else {
-      const errorData = await res.json()
-      toast.error(`Failed to save preferences: ${errorData.error || res.statusText}`)
-      console.error("Failed to save preferences:", errorData)
+    if (
+      !form.location.trim() ||
+      !form.gender.trim() ||
+      !form.occupation.trim() ||
+      !form.preferences.cleanliness.trim() ||
+      !form.preferences.nightOwl.trim() ||
+      !form.preferences.smoker.trim()
+    ) {
+      toast.error("Please fill in all fields before submitting.");
+      return;
     }
-  } catch (err: any) {
-    console.error("Error saving preferences:", err)
-    toast.error(`An unexpected error occurred while saving: ${err.message}`)
-  } finally {
-    setSaving(false)
-  }
-}
 
+    setSaving(true);
+    try {
+      const res = await fetch("/api/preferences", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      if (res.ok) {
+        toast.success("Preferences saved successfully!");
+        router.push("/match");
+      } else if (res.status === 401) {
+        toast.error("Session expired or unauthorized. Please log in again.");
+        router.push("/auth");
+      } else {
+        const errorData = await res.json();
+        toast.error(
+          `Failed to save preferences: ${errorData.error || res.statusText}`
+        );
+        console.error("Failed to save preferences:", errorData);
+      }
+    } catch (err: any) {
+      console.error("Error saving preferences:", err);
+      toast.error(`An unexpected error occurred while saving: ${err.message}`);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -149,7 +166,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -158,11 +175,13 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-red-200 max-w-md w-full text-center">
           <div className="text-red-600 mb-4">{error}</div>
           <Link href="/auth">
-            <Button className="bg-[#d2b53b] hover:bg-[#d2b53b]/90 text-white">Go to Login</Button>
+            <Button className="bg-[#d2b53b] hover:bg-[#d2b53b]/90 text-white">
+              Go to Login
+            </Button>
           </Link>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -179,15 +198,19 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
             href="/"
             className="inline-flex items-center gap-2 text-[#100e06]/70 hover:text-[#100e06] transition-colors mb-6 group"
           >
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            Back to Home
+            <Button className="bg-[#d2b53b] hover:bg-[#d2b53b]/90 text-white rounded-xl px-4 py-2 flex items-center gap-2">
+              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+              Back to Home
+            </Button>
           </Link>
 
           <div className="text-center">
             <h1 className="text-3xl md:text-4xl font-bold text-[#100e06] mb-2">
               Set Your <span className="text-[#d2b53b]">Preferences</span>
             </h1>
-            <p className="text-[#100e06]/70">Help us find your perfect roommate match</p>
+            <p className="text-[#100e06]/70">
+              Help us find your perfect roommate match
+            </p>
           </div>
         </div>
 
@@ -203,7 +226,10 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="location" className="text-[#100e06] font-medium flex items-center gap-2">
+                  <Label
+                    htmlFor="location"
+                    className="text-[#100e06] font-medium flex items-center gap-2"
+                  >
                     <MapPin className="w-4 h-4" />
                     Location
                   </Label>
@@ -211,18 +237,28 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                     id="location"
                     name="location"
                     value={form.location}
-                    onChange={(e) => handleInputChange("location", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("location", e.target.value)
+                    }
                     placeholder="Enter your city"
                     className="bg-white/50 border-[#ebd98d]/50 focus:border-[#d2b53b] rounded-xl"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="gender" className="text-[#100e06] font-medium flex items-center gap-2">
-                    <IoMdPerson className="w-4 h-4"/>
+                  <Label
+                    htmlFor="gender"
+                    className="text-[#100e06] font-medium flex items-center gap-2"
+                  >
+                    <IoMdPerson className="w-4 h-4" />
                     Gender
                   </Label>
-                  <Select value={form.gender} onValueChange={(value) => handleInputChange("gender", value)}>
+                  <Select
+                    value={form.gender}
+                    onValueChange={(value) =>
+                      handleInputChange("gender", value)
+                    }
+                  >
                     <SelectTrigger className="bg-white/50 border-[#ebd98d]/50 focus:border-[#d2b53b] rounded-xl">
                       <SelectValue placeholder="Select gender" />
                     </SelectTrigger>
@@ -230,14 +266,19 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                       <SelectItem value="male">Male</SelectItem>
                       <SelectItem value="female">Female</SelectItem>
                       <SelectItem value="non-binary">Non-Binary</SelectItem>
-                      <SelectItem value="prefer-not-say">Prefer not to say</SelectItem>
+                      <SelectItem value="prefer-not-say">
+                        Prefer not to say
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="occupation" className="text-[#100e06] font-medium flex items-center gap-2">
+                <Label
+                  htmlFor="occupation"
+                  className="text-[#100e06] font-medium flex items-center gap-2"
+                >
                   <Briefcase className="w-4 h-4" />
                   Occupation
                 </Label>
@@ -245,7 +286,9 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                   id="occupation"
                   name="occupation"
                   value={form.occupation}
-                  onChange={(e) => handleInputChange("occupation", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("occupation", e.target.value)
+                  }
                   placeholder="What do you do for work?"
                   className="bg-white/50 border-[#ebd98d]/50 focus:border-[#d2b53b] rounded-xl"
                 />
@@ -261,13 +304,18 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 
               <div className="grid md:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="cleanliness" className="text-[#100e06] font-medium flex items-center gap-2">
+                  <Label
+                    htmlFor="cleanliness"
+                    className="text-[#100e06] font-medium flex items-center gap-2"
+                  >
                     <MdCleaningServices className="w-4 h-4" />
                     Cleanliness Level
                   </Label>
                   <Select
                     value={form.preferences.cleanliness}
-                    onValueChange={(value) => handleInputChange("cleanliness", value)}
+                    onValueChange={(value) =>
+                      handleInputChange("cleanliness", value)
+                    }
                   >
                     <SelectTrigger className="bg-white/50 border-[#ebd98d]/50 focus:border-[#d2b53b] rounded-xl">
                       <SelectValue placeholder="Select level" />
@@ -281,13 +329,18 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="nightOwl" className="text-[#100e06] font-medium flex items-center gap-2">
+                  <Label
+                    htmlFor="nightOwl"
+                    className="text-[#100e06] font-medium flex items-center gap-2"
+                  >
                     <Moon className="w-4 h-4" />
                     Night Owl?
                   </Label>
                   <Select
                     value={form.preferences.nightOwl}
-                    onValueChange={(value) => handleInputChange("nightOwl", value)}
+                    onValueChange={(value) =>
+                      handleInputChange("nightOwl", value)
+                    }
                   >
                     <SelectTrigger className="bg-white/50 border-[#ebd98d]/50 focus:border-[#d2b53b] rounded-xl">
                       <SelectValue placeholder="Select option" />
@@ -300,11 +353,19 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="smoker" className="text-[#100e06] font-medium flex items-center gap-2">
+                  <Label
+                    htmlFor="smoker"
+                    className="text-[#100e06] font-medium flex items-center gap-2"
+                  >
                     <Cigarette className="w-4 h-4" />
                     Smoker?
                   </Label>
-                  <Select value={form.preferences.smoker} onValueChange={(value) => handleInputChange("smoker", value)}>
+                  <Select
+                    value={form.preferences.smoker}
+                    onValueChange={(value) =>
+                      handleInputChange("smoker", value)
+                    }
+                  >
                     <SelectTrigger className="bg-white/50 border-[#ebd98d]/50 focus:border-[#d2b53b] rounded-xl">
                       <SelectValue placeholder="Select option" />
                     </SelectTrigger>
@@ -342,11 +403,14 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 
         {/* Alternative Navigation */}
         <div className="mt-6 text-center">
-          <Link href="/match" className="text-[#d2b53b] hover:text-[#d2b53b]/80 font-medium">
+          <Link
+            href="/match"
+            className="text-[#d2b53b] hover:text-[#d2b53b]/80 font-medium"
+          >
             Skip for now and browse matches →
           </Link>
         </div>
       </div>
     </div>
-  )
+  );
 }

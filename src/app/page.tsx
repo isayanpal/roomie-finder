@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { MessageCircle, Settings, Search } from "lucide-react"
@@ -10,8 +11,16 @@ import HowItWorks from "@/components/landingpage/how-it-works"
 import { createClient } from "@/utils/supabase/client"
 
 export default function Home() {
-  const supabase = createClient()
-  // const session = await supabase.auth.getSession();
+  const [loggedInUser, setLoggedInUser] = useState<any | null>(null)
+
+  useEffect(() => {
+    const getUser = async () => {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      setLoggedInUser(user)
+    }
+    getUser()
+  }, [])
 
   const features = [
     {
@@ -56,7 +65,7 @@ export default function Home() {
           <p className="text-lg text-[#100e06]/70 mb-8">
             Join thousands of happy users who found their ideal living situation through Roomie Finder.
           </p>
-          <Link href="/preferences">
+          <Link href={loggedInUser ? "/preferences" : "/auth"}>
             <Button
               size="lg"
               className="bg-[#d2b53b] hover:bg-[#d2b53b]/90 text-white px-8 py-6 text-lg font-semibold rounded-full shadow-lg"
