@@ -1,46 +1,45 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { Button } from "@/components/ui/button"
-import { createClient } from "@/utils/supabase/client"
-import Link from "next/link"
-import { useParams, useRouter } from "next/navigation"
-import { useEffect, useRef, useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { ArrowLeft, Send } from "lucide-react"
+import { Button } from "@/components/ui/button";
+import { createClient } from "@/utils/supabase/client";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft, Send } from "lucide-react";
 
 export default function ChatRoom() {
-  const supabase = createClient()
-  const { id: otherId } = useParams()
-  const [msgs, setMsgs] = useState<any[]>([])
-  const [input, setInput] = useState("")
-  const [me, setMe] = useState<string>("")
-  const [isSending, setIsSending] = useState(false)
-  const [otherUser, setOtherUser] = useState<any>(null)
+  const supabase = createClient();
+  const { id: otherId } = useParams();
+  const [msgs, setMsgs] = useState<any[]>([]);
+  const [input, setInput] = useState("");
+  const [me, setMe] = useState<string>("");
+  const [isSending, setIsSending] = useState(false);
+  const [otherUser, setOtherUser] = useState<any>(null);
 
-  const bottomRef = useRef<HTMLDivElement>(null)
-  const router = useRouter()
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   useEffect(() => {
-    ;(async () => {
+    (async () => {
       try {
         // setIsLoading(true)
         const {
           data: { user },
-        } = await supabase.auth.getUser()
+        } = await supabase.auth.getUser();
         if (!user) {
-          router.push("/auth")
+          router.push("/auth");
         }
-        if (!user) return
-        setMe(user.id)
+        if (!user) return;
+        setMe(user.id);
 
         // Fetch other user details
-        const userRes = await fetch(`/api/user/${otherId}`)
+        const userRes = await fetch(`/api/user/${otherId}`);
         if (userRes.ok) {
-          const userData = await userRes.json()
-          setOtherUser(userData)
-          
+          const userData = await userRes.json();
+          setOtherUser(userData);
         }
 
         // Mark messages as read
@@ -48,61 +47,65 @@ export default function ChatRoom() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ markRead: true, otherUserId: otherId }),
-        })
+        });
 
         // Load initial messages
-        const res = await fetch(`/api/messages?otherUserId=${otherId}`)
-        const initialMsgs = await res.json()
-        setMsgs(initialMsgs)
+        const res = await fetch(`/api/messages?otherUserId=${otherId}`);
+        const initialMsgs = await res.json();
+        setMsgs(initialMsgs);
 
         // Subscribe to real-time messages
         const channel = supabase
           .channel("msgs")
-          .on("postgres_changes", { event: "INSERT", schema: "public", table: "Message" }, (payload) => {
-            const m = payload.new
+          .on(
+            "postgres_changes",
+            { event: "INSERT", schema: "public", table: "Message" },
+            (payload) => {
+              const m = payload.new;
 
-            // Check if this message belongs to this chat
-            if (
-              (m.senderId === user.id && m.receiverId === otherId) ||
-              (m.senderId === otherId && m.receiverId === user.id)
-            ) {
-              setMsgs((prev) => {
-                // Check if the message ID already exists in the list
-                if (prev.some((msg) => msg.id === m.id)) {
-                  return prev // Message already exists
-                }
-                return [...prev, m] // Add new message
-              })
+              // Check if this message belongs to this chat
+              if (
+                (m.senderId === user.id && m.receiverId === otherId) ||
+                (m.senderId === otherId && m.receiverId === user.id)
+              ) {
+                setMsgs((prev) => {
+                  // Check if the message ID already exists in the list
+                  if (prev.some((msg) => msg.id === m.id)) {
+                    return prev; // Message already exists
+                  }
+                  return [...prev, m]; // Add new message
+                });
+              }
             }
-          })
-          .subscribe()
+          )
+          .subscribe();
 
         return () => {
-          supabase.removeChannel(channel)
-        }
+          supabase.removeChannel(channel);
+        };
       } catch (error) {
-        console.log("Error in chat initialization:", error)
+        console.log("Error in chat initialization:", error);
       }
-    })()
-  }, [otherId, supabase, msgs])
+    })();
+  }, [otherId, supabase, msgs]);
 
   useEffect(() => {
-    const container = bottomRef.current?.parentElement
+    const container = bottomRef.current?.parentElement;
     if (container) {
       container.scrollTo({
         top: container.scrollHeight,
         behavior: "smooth",
-      })
+      });
     }
-  }, [msgs])
+  }, [msgs]);
 
   const send = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!input.trim()) return
+    e.preventDefault();
+    if (!input.trim()) return;
 
-    const messageContent = input
-    setInput("")
-    setIsSending(true)
+    const messageContent = input;
+    setInput("");
+    setIsSending(true);
 
     try {
       const res = await fetch("/api/messages", {
@@ -112,18 +115,18 @@ export default function ChatRoom() {
           receiverId: otherId,
           content: messageContent,
         }),
-      })
+      });
 
       if (!res.ok) {
-        const errorData = await res.json()
-        console.error("Failed to send message:", errorData)
+        const errorData = await res.json();
+        console.error("Failed to send message:", errorData);
       }
     } catch (error) {
-      console.error("Error sending message:", error)
+      console.error("Error sending message:", error);
     } finally {
-      setIsSending(false)
+      setIsSending(false);
     }
-  }
+  };
   return (
     <div className="bg-[#fbf9f1] flex items-center justify-center p-4">
       {/* Background decorative elements */}
@@ -151,13 +154,17 @@ export default function ChatRoom() {
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <span className="font-medium text-[#100e06] text-[12px]">Back to Chats</span>
+            <span className="font-medium text-[#100e06] text-[12px]">
+              Back to Chats
+            </span>
           </Link>
 
           {otherUser && (
             <div className="flex items-center gap-2">
               <div className="text-right">
-                <p className="font-medium text-[#100e06] text-[12px]">{otherUser.name}</p>
+                <p className="font-medium text-[#100e06] text-[12px]">
+                  {otherUser.name}
+                </p>
               </div>
               <div className="relative">
                 <img
@@ -178,7 +185,11 @@ export default function ChatRoom() {
         >
           <AnimatePresence initial={false}>
             {msgs
-              .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+              .sort(
+                (a, b) =>
+                  new Date(a.created_at).getTime() -
+                  new Date(b.created_at).getTime()
+              )
               .map((m, index) => (
                 <motion.div
                   key={m.id}
@@ -188,7 +199,9 @@ export default function ChatRoom() {
                     duration: 0.3,
                     delay: index * 0.05 > 0.5 ? 0.5 : index * 0.05,
                   }}
-                  className={`flex mb-3 ${m.senderId === me ? "justify-end" : "justify-start"}`}
+                  className={`flex mb-3 ${
+                    m.senderId === me ? "justify-end" : "justify-start"
+                  }`}
                 >
                   <motion.div
                     whileHover={{ scale: 1.02 }}
@@ -211,10 +224,12 @@ export default function ChatRoom() {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.3 }}
           onSubmit={send}
-          className="border-t border-[#ebd98d]/30 p-3 flex items-center bg-white/80"
+          className="border-t border-[#ebd98d]/30 p-2 sm:p-3 flex items-center bg-white/80 w-full"
         >
           <input
-            className="flex-1 px-4 py-3 border border-[#ebd98d]/50 rounded-full bg-white/50 focus:outline-none focus:ring-2 focus:ring-[#d2b53b] focus:border-transparent"
+            className="flex-1 px-3 py-2 sm:py-3 border border-[#ebd98d]/50 rounded-full bg-white/50 
+               focus:outline-none focus:ring-2 focus:ring-[#d2b53b] focus:border-transparent 
+               text-sm sm:text-base"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Type a message…"
@@ -225,18 +240,20 @@ export default function ChatRoom() {
             whileTap={{ scale: 0.95 }}
             type="submit"
             disabled={isSending || !input.trim()}
-            className={`ml-2 p-3 rounded-full ${
-              input.trim() ? "bg-[#d2b53b] text-white" : "bg-[#ebd98d]/30 text-[#100e06]/50"
+            className={`ml-2 p-2 sm:p-3 rounded-full transition-all duration-200 ${
+              input.trim()
+                ? "bg-[#d2b53b] text-white"
+                : "bg-[#ebd98d]/30 text-[#100e06]/50"
             } flex items-center justify-center`}
           >
             {isSending ? (
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             ) : (
-              <Send className="h-5 w-5" />
+              <Send className="h-4 w-4 sm:h-5 sm:w-5" />
             )}
           </motion.button>
         </motion.form>
       </motion.div>
     </div>
-  )
+  );
 }

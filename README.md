@@ -4,11 +4,12 @@ A smart roommate-matching platform designed specifically for students and workin
 
 ### Deployed Link - https://roomie-finder-v0.vercel.app/
 
-<img src="images/1.png">
-<img src="images/2.png">
-<img src="images/3.png">
-<img src="images/4.png">
-<img src="images/5.png">
+<img src="images/new1.png">
+<img src="images/new2.png">
+<img src="images/new3.png">
+<img src="images/new4.png">
+<img src="images/new5.png">
+<img src="images/new6.png">
 
 ## Features
 

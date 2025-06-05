@@ -137,7 +137,10 @@ export default function NavbarWithAuth() {
                 <>
                   <NotificationBell />
                   <NavbarButton
-                    onClick={profileRoute}
+                    onClick={()=>{
+                      profileRoute();
+                      setIsMobileMenuOpen(false);
+                    }}
                     className="bg-[#d2b53b] hover:bg-[#d2b53b]/90 text-white border-none font-medium"
                   >
                     Profile
