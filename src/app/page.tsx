@@ -1,47 +1,28 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
-import { MessageCircle, Settings, Search } from "lucide-react"
-import AnimatedHero from "@/components/landingpage/animated-hero"
-import FeatureCard from "@/components/landingpage/feature-card"
-import FloatingElements from "@/components/landingpage/floating-elements"
-import HowItWorks from "@/components/landingpage/how-it-works"
-import { createClient } from "@/utils/supabase/client"
+import AnimatedHero from "@/components/landingpage/animated-hero";
+import FeatureCard from "@/components/landingpage/feature-card";
+import FloatingElements from "@/components/landingpage/floating-elements";
+import HowItWorks from "@/components/landingpage/how-it-works";
+import { Button } from "@/components/ui/button";
+import { features } from "@/constants/constants";
+import { createClient } from "@/utils/supabase/client";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function Home() {
-  const [loggedInUser, setLoggedInUser] = useState<any | null>(null)
+  const [loggedInUser, setLoggedInUser] = useState<any | null>(null);
 
   useEffect(() => {
     const getUser = async () => {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      setLoggedInUser(user)
-    }
-    getUser()
-  }, [])
-
-  const features = [
-    {
-      icon: Settings,
-      title: "Set Your Preferences",
-      description:
-        "Customize your living preferences, budget, and lifestyle choices to find the perfect match. Tell us what matters most to you in a roommate.",
-    },
-    {
-      icon: Search,
-      title: "Find Matching Profiles",
-      description:
-        "Discover compatible roommates based on your preferences and shared interests. Our smart algorithm ensures you only see relevant matches.",
-    },
-    {
-      icon: MessageCircle,
-      title: "Realtime Chat",
-      description:
-        "Connect instantly with potential roommates through our seamless chat feature. Get to know each other before deciding to meet in person.",
-    },
-  ]
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setLoggedInUser(user);
+    };
+    getUser();
+  }, []);
 
   return (
     <div className="min-h-screen text-[#100e06] overflow-hidden relative">
@@ -52,7 +33,12 @@ export default function Home() {
         {/* Features Section */}
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {features.map((feature, index) => (
-            <FeatureCard key={index} icon={feature.icon} title={feature.title} description={feature.description} />
+            <FeatureCard
+              key={index}
+              icon={feature.icon}
+              title={feature.title}
+              description={feature.description}
+            />
           ))}
         </div>
 
@@ -61,9 +47,12 @@ export default function Home() {
 
         {/* CTA Section */}
         <div className="text-center py-16 max-w-3xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to find your perfect roommate?</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">
+            Ready to find your perfect roommate?
+          </h2>
           <p className="text-lg text-[#100e06]/70 mb-8">
-            Join thousands of happy users who found their ideal living situation through Roomie Finder.
+            Join thousands of happy users who found their ideal living situation
+            through Roomie Finder.
           </p>
           <Link href={loggedInUser ? "/preferences" : "/auth"}>
             <Button
@@ -79,5 +68,5 @@ export default function Home() {
         <FloatingElements />
       </div>
     </div>
-  )
+  );
 }

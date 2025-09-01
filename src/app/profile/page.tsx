@@ -1,36 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ProfileData } from "@/constants/interfaces";
 import {
   ArrowLeft,
+  Briefcase,
+  Cigarette,
+  Home,
+  MapPin,
+  Moon,
   Settings,
   User,
-  MapPin,
-  Briefcase,
-  Home,
-  Moon,
-  Cigarette,
 } from "lucide-react";
-
-interface ProfileData {
-  id: string;
-  name: string | null;
-  email: string;
-  profileImage: string | null;
-  gender: string;
-  location: string;
-  occupation: string;
-  preferences: {
-    cleanliness: string;
-    nightOwl: string;
-    smoker: string;
-  };
-}
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<ProfileData | null>(null);

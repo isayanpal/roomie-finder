@@ -1,19 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { User } from "@/constants/interfaces";
 import { createClient } from "@/utils/supabase/client";
+import { ArrowLeft, Clock, MessageCircle, Users } from "lucide-react";
 import Link from "next/link";
-import { ArrowLeft, MessageCircle, Users, Clock } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
-
-interface User {
-  id: string;
-  name: string;
-  image: string;
-  lastMessage?: string;
-  lastMessageTime?: string;
-}
 
 export default function ChatHistory() {
   const [users, setUsers] = useState<User[]>([]);

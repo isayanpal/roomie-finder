@@ -12,36 +12,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { FormData } from "@/constants/interfaces";
 import { createClient } from "@/utils/supabase/client";
+import {
+  ArrowLeft,
+  Briefcase,
+  Cigarette,
+  Home,
+  MapPin,
+  Moon,
+  Save,
+  User,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import {
-  ArrowLeft,
-  MapPin,
-  User,
-  Briefcase,
-  Home,
-  Moon,
-  Cigarette,
-  Save,
-} from "lucide-react";
-import { MdCleaningServices } from "react-icons/md";
 import { IoMdPerson } from "react-icons/io";
-
-interface Preferences {
-  cleanliness: string;
-  nightOwl: string;
-  smoker: string;
-}
-
-interface FormData {
-  location: string;
-  gender: string;
-  occupation: string;
-  preferences: Preferences;
-}
+import { MdCleaningServices } from "react-icons/md";
 
 export default function PreferencesPage() {
   const supabase = createClient();

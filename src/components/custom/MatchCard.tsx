@@ -1,22 +1,24 @@
-"use client"
+"use client";
 
-import type React from "react"
-import Link from "next/link"
-import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { RadialBarChart, RadialBar, PolarGrid, PolarRadiusAxis, Label } from "recharts"
-import { motion } from "framer-motion"
-import { MapPin, Briefcase, User, MessageCircle, Heart } from "lucide-react"
-
-interface MatchCardProps {
-  userId: string
-  userImage: string
-  userName: string
-  matchPercent: number
-  location: string
-  gender: string
-  occupation: string
-}
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
+import { MatchCardProps } from "@/constants/interfaces";
+import { motion } from "framer-motion";
+import { Briefcase, Heart, MapPin, MessageCircle, User } from "lucide-react";
+import Link from "next/link";
+import type React from "react";
+import {
+  Label,
+  PolarGrid,
+  PolarRadiusAxis,
+  RadialBar,
+  RadialBarChart,
+} from "recharts";
 
 export const MatchCard: React.FC<MatchCardProps> = ({
   userId,
@@ -27,15 +29,17 @@ export const MatchCard: React.FC<MatchCardProps> = ({
   gender,
   occupation,
 }) => {
-  const chartData = [{ name: "match", value: matchPercent ?? 0, fill: "#d2b53b" }]
+  const chartData = [
+    { name: "match", value: matchPercent ?? 0, fill: "#d2b53b" },
+  ];
 
   const getMatchColor = (percent: number) => {
-    return "text-[#100e06]"
-  }
+    return "text-[#100e06]";
+  };
 
   const getMatchGradient = (percent: number) => {
-    return "from-[#d2b53b] to-[#ebd060]"
-  }
+    return "from-[#d2b53b] to-[#ebd060]";
+  };
 
   return (
     <motion.div
@@ -102,28 +106,46 @@ export const MatchCard: React.FC<MatchCardProps> = ({
                 endAngle={-270}
               >
                 <PolarGrid radialLines={false} stroke="none" />
-                <RadialBar background={{ fill: "#ebd98d30" }} dataKey="value" cornerRadius={10} fill="#d2b53b" />
+                <RadialBar
+                  background={{ fill: "#ebd98d30" }}
+                  dataKey="value"
+                  cornerRadius={10}
+                  fill="#d2b53b"
+                />
                 <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
                   <Label
                     content={(props) => {
-                      const viewBox = props?.viewBox as any
-                      const cx = typeof viewBox?.cx === "number" ? viewBox.cx : 40
-                      const cy = typeof viewBox?.cy === "number" ? viewBox.cy : 40
+                      const viewBox = props?.viewBox as any;
+                      const cx =
+                        typeof viewBox?.cx === "number" ? viewBox.cx : 40;
+                      const cy =
+                        typeof viewBox?.cy === "number" ? viewBox.cy : 40;
 
                       return (
-                        <text x={cx} y={cy} textAnchor="middle" dominantBaseline="middle">
+                        <text
+                          x={cx}
+                          y={cy}
+                          textAnchor="middle"
+                          dominantBaseline="middle"
+                        >
                           <tspan
                             x={cx}
                             y={cy - 3}
-                            className={`${getMatchColor(matchPercent)} text-base font-bold fill-current`}
+                            className={`${getMatchColor(
+                              matchPercent
+                            )} text-base font-bold fill-current`}
                           >
                             {`${matchPercent ?? 0}%`}
                           </tspan>
-                          <tspan x={cx} y={cy + 10} className="fill-[#100e06]/60 text-xs font-medium">
+                          <tspan
+                            x={cx}
+                            y={cy + 10}
+                            className="fill-[#100e06]/60 text-xs font-medium"
+                          >
                             Match
                           </tspan>
                         </text>
-                      )
+                      );
                     }}
                   />
                 </PolarRadiusAxis>
@@ -171,7 +193,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({
               <Link href={`/chat/${userId}`} className="w-full">
                 <Button
                   className={`w-full bg-gradient-to-r ${getMatchGradient(
-                    matchPercent,
+                    matchPercent
                   )} hover:opacity-90 active:scale-[0.98] transition-all duration-300 text-white font-medium py-2 text-sm rounded-xl shadow-lg hover:shadow-xl border-0`}
                 >
                   <MessageCircle className="w-4 h-4 mr-1.5" />
@@ -183,5 +205,5 @@ export const MatchCard: React.FC<MatchCardProps> = ({
         </div>
       </Card>
     </motion.div>
-  )
-}
+  );
+};

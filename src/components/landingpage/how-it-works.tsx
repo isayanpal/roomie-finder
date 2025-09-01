@@ -1,25 +1,7 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { ClipboardCheck, Search, MessageSquare } from "lucide-react"
-
-const steps = [
-  {
-    icon: ClipboardCheck,
-    title: "Create Your Profile",
-    description: "Set up your profile with your preferences, lifestyle, and what you're looking for in a roommate.",
-  },
-  {
-    icon: Search,
-    title: "Browse Matches",
-    description: "Our algorithm finds potential roommates who match your criteria and lifestyle preferences.",
-  },
-  {
-    icon: MessageSquare,
-    title: "Connect & Decide",
-    description: "Chat with your matches in real-time and find the perfect person to share your space with.",
-  },
-]
+import { steps } from "@/constants/constants";
+import { motion } from "framer-motion";
 
 export default function HowItWorks() {
   const containerVariants = {
@@ -31,7 +13,7 @@ export default function HowItWorks() {
         staggerChildren: 0.2,
       },
     },
-  }
+  };
 
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
@@ -43,7 +25,7 @@ export default function HowItWorks() {
         ease: "easeOut",
       },
     },
-  }
+  };
 
   return (
     <div className="py-16">
@@ -72,7 +54,11 @@ export default function HowItWorks() {
         animate="visible"
       >
         {steps.map((step, index) => (
-          <motion.div key={index} className="flex-1 relative" variants={itemVariants}>
+          <motion.div
+            key={index}
+            className="flex-1 relative"
+            variants={itemVariants}
+          >
             <div className="bg-[#ebd98d]/20 rounded-2xl p-8 text-center h-full border border-[#ebd98d]/30">
               <div className="w-16 h-16 bg-[#d2b53b] rounded-full flex items-center justify-center mx-auto mb-6">
                 <step.icon className="w-8 h-8 text-white" />
@@ -86,7 +72,11 @@ export default function HowItWorks() {
               <motion.div
                 className="hidden md:block absolute top-1/2 -right-4 w-8 h-8 text-[#d2b53b]"
                 animate={{ x: [0, 10, 0] }}
-                transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+                transition={{
+                  duration: 2,
+                  repeat: Number.POSITIVE_INFINITY,
+                  ease: "easeInOut",
+                }}
               >
                 →
               </motion.div>
@@ -95,5 +85,5 @@ export default function HowItWorks() {
         ))}
       </motion.div>
     </div>
-  )
+  );
 }

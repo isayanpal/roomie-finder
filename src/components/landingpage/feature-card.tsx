@@ -1,15 +1,13 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import type { LucideIcon } from "lucide-react"
+import { FeatureCardProps } from "@/constants/interfaces";
+import { motion } from "framer-motion";
 
-interface FeatureCardProps {
-  icon: LucideIcon
-  title: string
-  description: string
-}
-
-export default function FeatureCard({ icon: Icon, title, description }: FeatureCardProps) {
+export default function FeatureCard({
+  icon: Icon,
+  title,
+  description,
+}: FeatureCardProps) {
   return (
     <motion.div
       className="group h-full"
@@ -29,8 +27,10 @@ export default function FeatureCard({ icon: Icon, title, description }: FeatureC
 
         <h3 className="text-xl font-bold mb-4 text-[#100e06]">{title}</h3>
 
-        <p className="text-[#100e06]/70 leading-relaxed flex-grow">{description}</p>
+        <p className="text-[#100e06]/70 leading-relaxed flex-grow">
+          {description}
+        </p>
       </div>
     </motion.div>
-  )
+  );
 }
