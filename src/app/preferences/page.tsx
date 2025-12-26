@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { FormData } from "@/constants/interfaces";
 import { createClient } from "@/utils/supabase/client";
+import { motion } from "framer-motion";
 import {
   ArrowLeft,
   Briefcase,
@@ -30,6 +31,31 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { IoMdPerson } from "react-icons/io";
 import { MdCleaningServices } from "react-icons/md";
+
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      type: "spring",
+      stiffness: 100,
+      damping: 15,
+    },
+  },
+};
 
 export default function PreferencesPage() {
   const supabase = createClient();
@@ -146,11 +172,16 @@ export default function PreferencesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#fbf9f1] flex items-center justify-center">
-        <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-[#ebd98d]/30">
-          <div className="flex items-center gap-3">
-            <div className="w-6 h-6 border-2 border-[#d2b53b] border-t-transparent rounded-full animate-spin" />
-            <span className="text-[#100e06]">Loading your preferences...</span>
+      <div className="min-h-screen bg-[#fbf9f1] flex items-center justify-center overflow-hidden relative">
+        <div className="absolute top-20 left-10 w-64 h-64 bg-[#ebd98d]/30 rounded-full blur-[100px] animate-pulse" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#d2b53b]/20 rounded-full blur-[120px] animate-pulse" />
+
+        <div className="bg-white/40 backdrop-blur-md rounded-3xl p-8 shadow-2xl border border-white/50 relative z-10">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 border-4 border-[#d2b53b] border-t-transparent rounded-full animate-spin" />
+            <span className="text-[#100e06] font-medium tracking-wide">
+              Loading your preferences...
+            </span>
           </div>
         </div>
       </div>
@@ -159,11 +190,13 @@ export default function PreferencesPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#fbf9f1] flex items-center justify-center p-6">
-        <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-red-200 max-w-md w-full text-center">
-          <div className="text-red-600 mb-4">{error}</div>
+      <div className="min-h-screen bg-[#fbf9f1] flex items-center justify-center p-6 relative overflow-hidden">
+        <div className="bg-white/40 backdrop-blur-md rounded-3xl p-10 shadow-2xl border border-red-200/50 max-w-md w-full text-center relative z-10">
+          <div className="text-red-500 font-medium mb-6 bg-red-50/50 py-3 px-4 rounded-xl border border-red-100">
+            {error}
+          </div>
           <Link href="/auth">
-            <Button className="bg-[#d2b53b] hover:bg-[#d2b53b]/90 text-white">
+            <Button className="bg-[#d2b53b] hover:bg-[#bfa330] text-white w-full rounded-xl py-6 shadow-lg shadow-[#d2b53b]/20 transition-all hover:scale-[1.02]">
               Go to Login
             </Button>
           </Link>
@@ -173,73 +206,105 @@ export default function PreferencesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fbf9f1] p-6">
-      {/* Background decorative elements */}
-      <div className="absolute top-20 left-10 w-32 h-32 bg-[#ebd98d]/20 rounded-full blur-2xl" />
-      <div className="absolute bottom-20 right-10 w-40 h-40 bg-[#ebd060]/15 rounded-full blur-2xl" />
-      <div className="absolute top-1/2 right-1/4 w-24 h-24 bg-[#d2b53b]/10 rounded-full blur-xl" />
+    <div className="min-h-screen bg-[#fbf9f1] p-4 md:p-8 relative w-screen left-[calc(-50vw+50%)] overflow-hidden font-poppins">
+      {/* Dynamic Background */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1.5 }}
+        className="absolute inset-0 overflow-hidden pointer-events-none"
+      >
+        <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] bg-[#ebd98d]/20 rounded-full blur-[120px]" />
+        <div className="absolute top-[40%] -right-[10%] w-[40%] h-[60%] bg-[#d2b53b]/10 rounded-full blur-[100px]" />
+        <div className="absolute -bottom-[20%] left-[20%] w-[60%] h-[40%] bg-[#ebd060]/15 rounded-full blur-[100px]" />
+      </motion.div>
 
-      <div className="max-w-2xl mx-auto relative">
-        {/* Header */}
-        <div className="mb-8">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-[#100e06]/70 hover:text-[#100e06] transition-colors mb-6 group"
-          >
-            <Button className="bg-[#d2b53b] hover:bg-[#d2b53b]/90 text-white rounded-xl px-4 py-2 flex items-center gap-2">
-              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-              Back to Home
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="max-w-3xl mx-auto relative z-10"
+      >
+        {/* Header Section */}
+        <motion.div variants={itemVariants} className="mb-8 md:mb-12">
+          <Link href="/" className="inline-block group">
+            <Button
+              variant="ghost"
+              className="bg-white/50 hover:bg-white/80 text-[#100e06]/80 hover:text-[#100e06] rounded-full px-5 py-2.5 flex items-center gap-2 backdrop-blur-sm border border-white/40 transition-all duration-300 shadow-sm hover:shadow-md mb-6"
+            >
+              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-300" />
+              <span className="font-medium">Back to Home</span>
             </Button>
           </Link>
 
-          <div className="text-center">
-            <h1 className="text-3xl md:text-4xl font-bold text-[#100e06] mb-2">
-              Set Your <span className="text-[#d2b53b]">Preferences</span>
-            </h1>
-            <p className="text-[#100e06]/70">
-              Help us find your perfect roommate match
-            </p>
+          <div className="text-center space-y-3">
+            <motion.h1
+              className="text-4xl md:text-5xl font-bold text-[#100e06]"
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.2, type: "spring" }}
+            >
+              Curate Your <span className="text-[#d2b53b]">Vibe</span>
+            </motion.h1>
+            <motion.p
+              className="text-[#100e06]/60 text-lg max-w-lg mx-auto leading-relaxed"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+            >
+              Tell us what makes you tick so we can find your perfect match.
+            </motion.p>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Main Form */}
-        <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-[#ebd98d]/30">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Basic Information */}
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-[#100e06] flex items-center gap-2">
-                <User className="w-5 h-5 text-[#d2b53b]" />
-                Basic Information
-              </h2>
+        {/* Main Form Card */}
+        <motion.div
+          variants={itemVariants}
+          className="bg-white/60 backdrop-blur-xl rounded-[2.5rem] p-6 md:p-10 shadow-xl border border-white/60 relative overflow-hidden"
+        >
+          {/* Glass Sheen Effect */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-transparent opacity-50 pointer-events-none" />
 
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
+          <form onSubmit={handleSubmit} className="space-y-10 relative">
+            {/* Section 1: Basic Info */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-3 border-b border-[#ebd98d]/30 pb-4 mb-6">
+                <div className="p-2.5 bg-[#d2b53b]/10 rounded-2xl text-[#d2b53b]">
+                  <User className="w-6 h-6" />
+                </div>
+                <h2 className="text-2xl font-bold text-[#100e06]">
+                  The Basics
+                </h2>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-2.5">
                   <Label
                     htmlFor="location"
-                    className="text-[#100e06] font-medium flex items-center gap-2"
+                    className="text-[#100e06]/80 font-medium text-sm ml-1 flex items-center gap-2"
                   >
-                    <MapPin className="w-4 h-4" />
-                    Location
+                    <MapPin className="w-3.5 h-3.5" /> Location
                   </Label>
-                  <Input
-                    id="location"
-                    name="location"
-                    value={form.location}
-                    onChange={(e) =>
-                      handleInputChange("location", e.target.value)
-                    }
-                    placeholder="Enter your city"
-                    className="bg-white/50 border-[#ebd98d]/50 focus:border-[#d2b53b] rounded-xl"
-                  />
+                  <div className="relative group">
+                    <Input
+                      id="location"
+                      name="location"
+                      value={form.location}
+                      onChange={(e) =>
+                        handleInputChange("location", e.target.value)
+                      }
+                      placeholder="Where do you live?"
+                      className="h-12 bg-white/70 border-transparent focus:border-[#d2b53b]/50 focus:bg-white focus:ring-4 focus:ring-[#d2b53b]/10 rounded-2xl transition-all duration-300 font-medium text-[#100e06] placeholder:text-[#100e06]/30 shadow-sm group-hover:bg-white/90"
+                    />
+                  </div>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   <Label
                     htmlFor="gender"
-                    className="text-[#100e06] font-medium flex items-center gap-2"
+                    className="text-[#100e06]/80 font-medium text-sm ml-1 flex items-center gap-2"
                   >
-                    <IoMdPerson className="w-4 h-4" />
-                    Gender
+                    <IoMdPerson className="w-3.5 h-3.5" /> Gender
                   </Label>
                   <Select
                     value={form.gender}
@@ -247,57 +312,65 @@ export default function PreferencesPage() {
                       handleInputChange("gender", value)
                     }
                   >
-                    <SelectTrigger className="bg-white/50 border-[#ebd98d]/50 focus:border-[#d2b53b] rounded-xl">
-                      <SelectValue placeholder="Select gender" />
+                    <SelectTrigger className="h-12 bg-white/70 border-transparent focus:border-[#d2b53b]/50 focus:ring-4 focus:ring-[#d2b53b]/10 rounded-2xl transition-all duration-300 font-medium text-[#100e06] shadow-sm hover:bg-white/90 data-[state=open]:bg-white">
+                      <SelectValue placeholder="Select..." />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="male">Male</SelectItem>
-                      <SelectItem value="female">Female</SelectItem>
-                      <SelectItem value="non-binary">Non-Binary</SelectItem>
-                      <SelectItem value="prefer-not-say">
-                        Prefer not to say
-                      </SelectItem>
+                    <SelectContent className="bg-white/90 backdrop-blur-xl border-white/50 rounded-2xl shadow-xl p-2">
+                      {[
+                        { val: "male", label: "Male" },
+                        { val: "female", label: "Female" },
+                        { val: "non-binary", label: "Non-Binary" },
+                        { val: "prefer-not-say", label: "Prefer not to say" },
+                      ].map((opt) => (
+                        <SelectItem
+                          key={opt.val}
+                          value={opt.val}
+                          className="rounded-xl focus:bg-[#d2b53b]/10 focus:text-[#d2b53b] cursor-pointer py-2.5 font-medium"
+                        >
+                          {opt.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <Label
-                  htmlFor="occupation"
-                  className="text-[#100e06] font-medium flex items-center gap-2"
-                >
-                  <Briefcase className="w-4 h-4" />
-                  Occupation
-                </Label>
-                <Input
-                  id="occupation"
-                  name="occupation"
-                  value={form.occupation}
-                  onChange={(e) =>
-                    handleInputChange("occupation", e.target.value)
-                  }
-                  placeholder="What do you do for work?"
-                  className="bg-white/50 border-[#ebd98d]/50 focus:border-[#d2b53b] rounded-xl"
-                />
+                <div className="space-y-2.5 md:col-span-2">
+                  <Label
+                    htmlFor="occupation"
+                    className="text-[#100e06]/80 font-medium text-sm ml-1 flex items-center gap-2"
+                  >
+                    <Briefcase className="w-3.5 h-3.5" /> Occupation
+                  </Label>
+                  <Input
+                    id="occupation"
+                    name="occupation"
+                    value={form.occupation}
+                    onChange={(e) =>
+                      handleInputChange("occupation", e.target.value)
+                    }
+                    placeholder="e.g. Graphic Designer"
+                    className="h-12 bg-white/70 border-transparent focus:border-[#d2b53b]/50 focus:bg-white focus:ring-4 focus:ring-[#d2b53b]/10 rounded-2xl transition-all duration-300 font-medium text-[#100e06] placeholder:text-[#100e06]/30 shadow-sm hover:bg-white/90"
+                  />
+                </div>
               </div>
             </div>
 
-            {/* Lifestyle Preferences */}
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-[#100e06] flex items-center gap-2">
-                <Home className="w-5 h-5 text-[#d2b53b]" />
-                Lifestyle Preferences
-              </h2>
+            {/* Section 2: Lifestyle */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-3 border-b border-[#ebd98d]/30 pb-4 mb-6">
+                <div className="p-2.5 bg-[#d2b53b]/10 rounded-2xl text-[#d2b53b]">
+                  <Home className="w-6 h-6" />
+                </div>
+                <h2 className="text-2xl font-bold text-[#100e06]">Lifestyle</h2>
+              </div>
 
-              <div className="grid md:grid-cols-3 gap-4">
-                <div className="space-y-2">
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="space-y-2.5">
                   <Label
                     htmlFor="cleanliness"
-                    className="text-[#100e06] font-medium flex items-center gap-2"
+                    className="text-[#100e06]/80 font-medium text-sm ml-1 flex items-center gap-2"
                   >
-                    <MdCleaningServices className="w-4 h-4" />
-                    Cleanliness Level
+                    <MdCleaningServices className="w-3.5 h-3.5" /> Cleanliness
                   </Label>
                   <Select
                     value={form.preferences.cleanliness}
@@ -305,24 +378,33 @@ export default function PreferencesPage() {
                       handleInputChange("cleanliness", value)
                     }
                   >
-                    <SelectTrigger className="bg-white/50 border-[#ebd98d]/50 focus:border-[#d2b53b] rounded-xl">
-                      <SelectValue placeholder="Select level" />
+                    <SelectTrigger className="h-12 bg-white/70 border-transparent focus:border-[#d2b53b]/50 focus:ring-4 focus:ring-[#d2b53b]/10 rounded-2xl transition-all duration-300 font-medium text-[#100e06] shadow-sm hover:bg-white/90">
+                      <SelectValue placeholder="Select..." />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="neat">Very Neat</SelectItem>
-                      <SelectItem value="average">Average</SelectItem>
-                      <SelectItem value="messy">Relaxed</SelectItem>
+                    <SelectContent className="bg-white/90 backdrop-blur-xl border-white/50 rounded-2xl shadow-xl p-2">
+                      {[
+                        { val: "neat", label: "Very Neat" },
+                        { val: "average", label: "Average" },
+                        { val: "messy", label: "Relaxed" },
+                      ].map((opt) => (
+                        <SelectItem
+                          key={opt.val}
+                          value={opt.val}
+                          className="rounded-xl focus:bg-[#d2b53b]/10 focus:text-[#d2b53b] cursor-pointer py-2.5 font-medium"
+                        >
+                          {opt.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   <Label
                     htmlFor="nightOwl"
-                    className="text-[#100e06] font-medium flex items-center gap-2"
+                    className="text-[#100e06]/80 font-medium text-sm ml-1 flex items-center gap-2"
                   >
-                    <Moon className="w-4 h-4" />
-                    Night Owl?
+                    <Moon className="w-3.5 h-3.5" /> Sleep Schedule
                   </Label>
                   <Select
                     value={form.preferences.nightOwl}
@@ -330,23 +412,32 @@ export default function PreferencesPage() {
                       handleInputChange("nightOwl", value)
                     }
                   >
-                    <SelectTrigger className="bg-white/50 border-[#ebd98d]/50 focus:border-[#d2b53b] rounded-xl">
-                      <SelectValue placeholder="Select option" />
+                    <SelectTrigger className="h-12 bg-white/70 border-transparent focus:border-[#d2b53b]/50 focus:ring-4 focus:ring-[#d2b53b]/10 rounded-2xl transition-all duration-300 font-medium text-[#100e06] shadow-sm hover:bg-white/90">
+                      <SelectValue placeholder="Select..." />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="yes">Yes, I stay up late</SelectItem>
-                      <SelectItem value="no">No, I sleep early</SelectItem>
+                    <SelectContent className="bg-white/90 backdrop-blur-xl border-white/50 rounded-2xl shadow-xl p-2">
+                      {[
+                        { val: "yes", label: "Night Owl 🦉" },
+                        { val: "no", label: "Early Bird 🌅" },
+                      ].map((opt) => (
+                        <SelectItem
+                          key={opt.val}
+                          value={opt.val}
+                          className="rounded-xl focus:bg-[#d2b53b]/10 focus:text-[#d2b53b] cursor-pointer py-2.5 font-medium"
+                        >
+                          {opt.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   <Label
                     htmlFor="smoker"
-                    className="text-[#100e06] font-medium flex items-center gap-2"
+                    className="text-[#100e06]/80 font-medium text-sm ml-1 flex items-center gap-2"
                   >
-                    <Cigarette className="w-4 h-4" />
-                    Smoker?
+                    <Cigarette className="w-3.5 h-3.5" /> Smoking
                   </Label>
                   <Select
                     value={form.preferences.smoker}
@@ -354,51 +445,62 @@ export default function PreferencesPage() {
                       handleInputChange("smoker", value)
                     }
                   >
-                    <SelectTrigger className="bg-white/50 border-[#ebd98d]/50 focus:border-[#d2b53b] rounded-xl">
-                      <SelectValue placeholder="Select option" />
+                    <SelectTrigger className="h-12 bg-white/70 border-transparent focus:border-[#d2b53b]/50 focus:ring-4 focus:ring-[#d2b53b]/10 rounded-2xl transition-all duration-300 font-medium text-[#100e06] shadow-sm hover:bg-white/90">
+                      <SelectValue placeholder="Select..." />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="yes">Yes</SelectItem>
-                      <SelectItem value="no">No</SelectItem>
+                    <SelectContent className="bg-white/90 backdrop-blur-xl border-white/50 rounded-2xl shadow-xl p-2">
+                      {[
+                        { val: "yes", label: "Yes" },
+                        { val: "no", label: "No" },
+                      ].map((opt) => (
+                        <SelectItem
+                          key={opt.val}
+                          value={opt.val}
+                          className="rounded-xl focus:bg-[#d2b53b]/10 focus:text-[#d2b53b] cursor-pointer py-2.5 font-medium"
+                        >
+                          {opt.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
               </div>
             </div>
 
-            {/* Submit Button */}
-            <div className="pt-4">
+            {/* Action Buttons */}
+            <div className="pt-6">
               <Button
                 type="submit"
                 disabled={saving}
-                className="w-full bg-[#d2b53b] hover:bg-[#d2b53b]/90 text-white rounded-xl py-6 text-lg font-semibold"
+                className="w-full h-14 bg-[#d2b53b] hover:bg-[#bfa330] text-white rounded-2xl text-lg font-bold shadow-lg shadow-[#d2b53b]/25 transition-all duration-300 hover:scale-[1.01] hover:shadow-xl relative overflow-hidden group"
               >
+                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 pointer-events-none" />
                 {saving ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Saving Preferences...
+                  <div className="flex items-center gap-3">
+                    <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Saving your profile...</span>
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
                     <Save className="w-5 h-5" />
-                    Save & Find Matches
+                    <span>Save Preferences & Find Match</span>
                   </div>
                 )}
               </Button>
             </div>
           </form>
-        </div>
+        </motion.div>
 
-        {/* Alternative Navigation */}
-        <div className="mt-6 text-center">
+        {/* Footer Link */}
+        <motion.div variants={itemVariants} className="mt-8 text-center">
           <Link
             href="/match"
-            className="text-[#d2b53b] hover:text-[#d2b53b]/80 font-medium"
+            className="inline-flex items-center gap-1 text-[#d2b53b] hover:text-[#bfa330] font-medium transition-colors border-b border-transparent hover:border-[#d2b53b]/50 pb-0.5"
           >
-            Skip for now and browse matches →
+            Skip for now and browse matches <span className="text-xl">→</span>
           </Link>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </div>
   );
 }

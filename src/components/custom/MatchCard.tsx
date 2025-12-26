@@ -1,24 +1,12 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { MatchCardProps } from "@/constants/interfaces";
 import { motion } from "framer-motion";
-import { Briefcase, Heart, MapPin, MessageCircle, User } from "lucide-react";
+import { Heart, MapPin, MessageCircle, User } from "lucide-react";
 import Link from "next/link";
 import type React from "react";
-import {
-  Label,
-  PolarGrid,
-  PolarRadiusAxis,
-  RadialBar,
-  RadialBarChart,
-} from "recharts";
 
 export const MatchCard: React.FC<MatchCardProps> = ({
   userId,
@@ -33,174 +21,91 @@ export const MatchCard: React.FC<MatchCardProps> = ({
     { name: "match", value: matchPercent ?? 0, fill: "#d2b53b" },
   ];
 
-  const getMatchColor = (percent: number) => {
-    return "text-[#100e06]";
-  };
-
-  const getMatchGradient = (percent: number) => {
-    return "from-[#d2b53b] to-[#ebd060]";
-  };
-
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.3 }}
-      whileHover={{ scale: 1.02 }}
-      className="w-full max-w-[280px] sm:max-w-[300px] mx-auto"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      whileHover={{ y: -5 }}
+      className="w-full max-w-[280px] sm:max-w-[300px] mx-auto group perspective-1000"
     >
-      <Card className="overflow-hidden border border-[#ebd98d]/30 shadow-lg hover:shadow-xl transition-all duration-300 bg-white/60 backdrop-blur-sm rounded-3xl relative h-full hover:border-[#d2b53b]/50">
-        {/* Floating background elements */}
-        <div className="absolute top-0 left-0 w-16 h-16 bg-[#ebd98d]/30 rounded-full mix-blend-multiply filter blur-xl opacity-50 transform -translate-x-1/2 -translate-y-1/2"></div>
-        <div className="absolute bottom-0 right-0 w-20 h-20 bg-[#ebd060]/20 rounded-full mix-blend-multiply filter blur-xl opacity-50 transform translate-x-1/2 translate-y-1/2"></div>
+      <Card className="overflow-hidden border-0 shadow-xl bg-white/10 backdrop-blur-md rounded-[2rem] relative h-full ring-1 ring-white/20 transition-all duration-300 group-hover:shadow-2xl group-hover:shadow-[#d2b53b]/10">
+        {/* Sleek Gradient Background Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-white/10 to-transparent opacity-50 z-0" />
+        <div className="absolute -top-20 -left-20 w-40 h-40 bg-[#d2b53b]/20 rounded-full blur-3xl" />
+        <div className="absolute -bottom-20 -right-20 w-40 h-40 bg-[#ebd060]/20 rounded-full blur-3xl" />
 
-        <div className="flex flex-col h-full">
-          <div className="relative h-24 flex items-center justify-center pt-4 pb-0">
+        <div className="relative z-10 flex flex-col h-full pt-6">
+          {/* Avatar Section with Integrated Match Badge */}
+          <div className="relative mx-auto mb-4">
             <motion.div
               whileHover={{ scale: 1.05 }}
-              transition={{ type: "spring", stiffness: 300 }}
-              className="relative z-10 -mb-12"
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              className="relative"
             >
-              <img
-                src={userImage || "/placeholder.svg"}
-                alt={userName}
-                className="rounded-full w-24 h-24 object-cover shadow-lg ring-4 ring-white border border-[#ebd98d]/30"
-              />
+              <div className="w-20 h-20 rounded-full p-1 bg-gradient-to-tr from-[#d2b53b] to-[#ebd060] shadow-lg">
+                <img
+                  src={userImage || "/placeholder.svg"}
+                  alt={userName}
+                  className="rounded-full w-full h-full object-cover border-2 border-white/80 bg-white"
+                />
+              </div>
+
+              {/* Floating Heart Icon */}
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                transition={{ delay: 0.2 }}
-                className="absolute -top-1 -right-1 bg-[#d2b53b] rounded-full p-1.5 shadow-lg"
+                transition={{ delay: 0.3 }}
+                className="absolute -bottom-1 -right-1 bg-white p-2 rounded-full shadow-md text-[#d2b53b]"
               >
-                <Heart className="w-3.5 h-3.5 text-white" fill="currentColor" />
+                <Heart className="w-4 h-4 fill-current" />
+              </motion.div>
+
+              {/* Floating Match Score Badge */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.4, type: "spring" }}
+                className="absolute -top-2 -right-4 bg-[#fff] text-[#100e06] text-[10px] font-bold px-2 py-1 rounded-full shadow-sm border border-[#d2b53b]/20 flex items-center gap-1"
+              >
+                <span className="text-[#d2b53b] text-xs">{matchPercent}%</span>{" "}
+                Match
               </motion.div>
             </motion.div>
           </div>
 
-          <CardHeader className="pt-10 px-4 text-center flex-grow-0">
-            <motion.h3
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="text-xl font-semibold text-[#100e06] group-hover:text-[#100e06]/80 transition-colors truncate"
-            >
-              {userName}
-            </motion.h3>
+          {/* User Info */}
+          <CardContent className="px-5 pb-2 text-center space-y-3 flex-grow">
+            <div>
+              <h3 className="text-2xl font-bold text-[#100e06] tracking-tight mb-1">
+                {userName}
+              </h3>
+              <p className="text-xs font-medium text-[#100e06]/50 uppercase tracking-widest letter-spacing-2">
+                {occupation}
+              </p>
+            </div>
 
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.3, type: "spring" }}
-              className="flex justify-center"
-            >
-              <RadialBarChart
-                width={80}
-                height={80}
-                cx="50%"
-                cy="50%"
-                innerRadius={25}
-                outerRadius={38}
-                barSize={7}
-                data={chartData}
-                startAngle={90}
-                endAngle={-270}
-              >
-                <PolarGrid radialLines={false} stroke="none" />
-                <RadialBar
-                  background={{ fill: "#ebd98d30" }}
-                  dataKey="value"
-                  cornerRadius={10}
-                  fill="#d2b53b"
-                />
-                <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
-                  <Label
-                    content={(props) => {
-                      const viewBox = props?.viewBox as any;
-                      const cx =
-                        typeof viewBox?.cx === "number" ? viewBox.cx : 40;
-                      const cy =
-                        typeof viewBox?.cy === "number" ? viewBox.cy : 40;
-
-                      return (
-                        <text
-                          x={cx}
-                          y={cy}
-                          textAnchor="middle"
-                          dominantBaseline="middle"
-                        >
-                          <tspan
-                            x={cx}
-                            y={cy - 3}
-                            className={`${getMatchColor(
-                              matchPercent
-                            )} text-base font-bold fill-current`}
-                          >
-                            {`${matchPercent ?? 0}%`}
-                          </tspan>
-                          <tspan
-                            x={cx}
-                            y={cy + 10}
-                            className="fill-[#100e06]/60 text-xs font-medium"
-                          >
-                            Match
-                          </tspan>
-                        </text>
-                      );
-                    }}
-                  />
-                </PolarRadiusAxis>
-              </RadialBarChart>
-            </motion.div>
-          </CardHeader>
-
-          <CardContent className="px-4 py-2 space-y-2 text-center text-[#100e06]/70 flex flex-col items-start">
-            <motion.div
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="flex items-center justify-center gap-1.5 text-sm w-full"
-            >
-              <MapPin className="w-3.5 h-3.5 text-[#d2b53b] flex-shrink-0" />
-              <span className="font-medium truncate">{location}</span>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.45 }}
-              className="flex items-center justify-center gap-1.5 text-sm w-full"
-            >
-              <User className="w-3.5 h-3.5 text-[#d2b53b] flex-shrink-0" />
-              <span className="font-medium truncate capitalize">{gender}</span>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="flex items-center justify-center gap-1.5 text-sm w-full"
-            >
-              <Briefcase className="w-3.5 h-3.5 text-[#d2b53b] flex-shrink-0" />
-              <span className="font-medium truncate">{occupation}</span>
-            </motion.div>
+            {/* Tags / Pills */}
+            <div className="flex flex-wrap justify-center gap-2 mt-3 text-xs font-medium text-[#100e06]/70">
+              <div className="px-3 py-1.5 rounded-full bg-white/40 border border-white/30 backdrop-blur-sm flex items-center gap-1.5 shadow-sm hover:bg-white/60 transition-colors">
+                <MapPin className="w-3 h-3 text-[#d2b53b]" />
+                {location}
+              </div>
+              <div className="px-3 py-1.5 rounded-full bg-white/40 border border-white/30 backdrop-blur-sm flex items-center gap-1.5 shadow-sm hover:bg-white/60 transition-colors capitalize">
+                <User className="w-3 h-3 text-[#d2b53b]" />
+                {gender}
+              </div>
+            </div>
           </CardContent>
 
-          <CardFooter className="p-4 pt-3 flex-grow-0">
-            <motion.div
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-              className="w-full"
-            >
-              <Link href={`/chat/${userId}`} className="w-full">
-                <Button
-                  className={`w-full bg-gradient-to-r ${getMatchGradient(
-                    matchPercent
-                  )} hover:opacity-90 active:scale-[0.98] transition-all duration-300 text-white font-medium py-2 text-sm rounded-xl shadow-lg hover:shadow-xl border-0`}
-                >
-                  <MessageCircle className="w-4 h-4 mr-1.5" />
-                  Start Chat
-                </Button>
-              </Link>
-            </motion.div>
+          {/* Action Button */}
+          <CardFooter className="p-5 pt-2 mt-2">
+            <Link href={`/chat/${userId}`} className="w-full">
+              <Button className="w-full bg-gradient-to-r from-[#d2b53b] to-[#ebd060] hover:opacity-90 active:scale-[0.98] transition-all duration-300 text-white shadow-lg hover:shadow-xl hover:scale-[1.02] rounded-full py-6 font-semibold tracking-wide border-0">
+                <MessageCircle className="w-4 h-4 mr-2" />
+                Connect
+              </Button>
+            </Link>
           </CardFooter>
         </div>
       </Card>
