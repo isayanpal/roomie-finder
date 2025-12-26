@@ -2,6 +2,7 @@
 
 import { User } from "@/constants/interfaces";
 import { createClient } from "@/utils/supabase/client";
+import { motion } from "framer-motion";
 import { ArrowLeft, Clock, MessageCircle, Users } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -41,12 +42,20 @@ export default function ChatHistory() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#fbf9f1] flex items-center justify-center">
-        <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-[#ebd98d]/30">
-          <div className="flex items-center gap-3">
-            <div className="w-6 h-6 border-2 border-[#d2b53b] border-t-transparent rounded-full animate-spin" />
-            <span className="text-[#100e06]">Loading chat history...</span>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-white/60 backdrop-blur-md rounded-[2rem] p-10 shadow-xl border border-[#ebd98d]/30"
+        >
+          <div className="flex flex-col items-center gap-4">
+            <div className="relative">
+              <div className="w-12 h-12 border-4 border-[#d2b53b]/30 border-t-[#d2b53b] rounded-full animate-spin" />
+            </div>
+            <span className="text-[#100e06] font-medium tracking-wide">
+              Loading conversations...
+            </span>
           </div>
-        </div>
+        </motion.div>
       </div>
     );
   }
@@ -54,147 +63,183 @@ export default function ChatHistory() {
   if (!loggedIn) {
     return (
       <div className="min-h-screen bg-[#fbf9f1] flex items-center justify-center p-6">
-        <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-red-200 max-w-md w-full text-center">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <MessageCircle className="w-8 h-8 text-red-500" />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white/60 backdrop-blur-md rounded-[2rem] p-8 shadow-xl border border-red-200/50 max-w-md w-full text-center"
+        >
+          <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+            <MessageCircle className="w-10 h-10 text-red-500" />
           </div>
-          <h3 className="text-xl font-semibold text-[#100e06] mb-2">
+          <h3 className="text-2xl font-bold text-[#100e06] mb-2">
             Authentication Required
           </h3>
-          <p className="text-[#100e06]/70 mb-6">
+          <p className="text-[#100e06]/70 mb-8 leading-relaxed">
             You must be logged in to view your chat history.
           </p>
-          <Link
-            href="/auth"
-            className="inline-flex items-center justify-center bg-[#d2b53b] hover:bg-[#d2b53b]/90 text-white px-6 py-3 rounded-xl font-medium transition-colors"
-          >
-            Go to Login
+          <Link href="/auth">
+            <Button className="w-full bg-gradient-to-r from-[#d2b53b] to-[#ebd060] hover:opacity-90 text-white py-6 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300">
+              Go to Login
+            </Button>
           </Link>
-        </div>
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#fbf9f1] relative">
+    <div className="min-h-screen bg-[#fbf9f1] relative w-screen left-[calc(-50vw+50%)] overflow-hidden">
       {/* Background decorative elements */}
-      <div className="absolute top-20 left-10 w-32 h-32 bg-[#ebd98d]/20 rounded-full blur-2xl" />
-      <div className="absolute bottom-20 right-10 w-40 h-40 bg-[#ebd060]/15 rounded-full blur-2xl" />
-      <div className="absolute top-1/2 right-1/4 w-24 h-24 bg-[#d2b53b]/10 rounded-full blur-xl" />
+      <div className="absolute top-20 -left-10 w-64 h-64 bg-[#ebd98d]/20 rounded-full blur-3xl mix-blend-multiply" />
+      <div className="absolute bottom-20 -right-10 w-80 h-80 bg-[#ebd060]/15 rounded-full blur-3xl mix-blend-multiply" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#d2b53b]/5 rounded-full blur-3xl" />
 
-      <div className="container mx-auto px-6 py-8 relative">
+      <div className="container mx-auto px-4 sm:px-6 py-8 relative z-10">
         {/* Header */}
-        <div className="mb-8">
-          <Link
-            href="/match"
-            className="inline-flex items-center gap-2 text-[#100e06]/70 hover:text-[#100e06] transition-colors mb-6 group"
-          >
-            <Button className="bg-[#d2b53b] hover:bg-[#d2b53b]/90 text-white rounded-xl px-4 py-2 flex items-center gap-2">
-              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-              Back to Matches
-            </Button>
-          </Link>
-
-          <div className="text-center">
-            <h1 className="text-3xl md:text-4xl font-bold text-[#100e06] mb-2 flex items-center justify-center gap-3">
-              <MessageCircle className="w-8 h-8 text-[#d2b53b]" />
-              Chat <span className="text-[#d2b53b]">History</span>
-            </h1>
-            <p className="text-[#100e06]/70">Your recent conversations</p>
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-10"
+        >
+          <div className="flex items-center justify-between mb-8">
+            <Link href="/match">
+              <Button
+                variant="ghost"
+                className="text-[#100e06]/70 hover:text-[#100e06] hover:bg-[#d2b53b]/10 rounded-full pl-2 pr-4 gap-2 transition-all"
+              >
+                <div className="bg-white p-2 rounded-full shadow-sm">
+                  <ArrowLeft className="w-4 h-4" />
+                </div>
+                <span className="font-medium">Back</span>
+              </Button>
+            </Link>
           </div>
-        </div>
+
+          <div className="text-center space-y-2">
+            <motion.h1
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              className="text-4xl md:text-5xl font-bold text-[#100e06] flex items-center justify-center gap-3 tracking-tight"
+            >
+              Chats
+              <span className="relative">
+                <span className="relative z-10 text-[#d2b53b]">History</span>
+                <span className="absolute bottom-1 left-0 w-full h-3 bg-[#ebd98d]/30 -rotate-2 z-0 rounded-full" />
+              </span>
+            </motion.h1>
+            <p className="text-[#100e06]/60 font-medium">
+              Your recent conversations and connections
+            </p>
+          </div>
+        </motion.div>
 
         {/* Chat List */}
         {users.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16">
-            <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-[#ebd98d]/30 max-w-md w-full text-center">
-              <div className="w-24 h-24 bg-[#ebd98d]/30 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Users className="w-12 h-12 text-[#d2b53b]" />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
+            className="flex flex-col items-center justify-center py-16"
+          >
+            <div className="bg-white/40 backdrop-blur-md rounded-[2.5rem] p-10 shadow-xl border border-white/50 max-w-md w-full text-center relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+              <div className="w-28 h-28 bg-gradient-to-tr from-[#d2b53b]/20 to-[#ebd060]/20 rounded-full flex items-center justify-center mx-auto mb-8 relative z-10 group-hover:scale-110 transition-transform duration-500">
+                <Users className="w-14 h-14 text-[#d2b53b]" />
               </div>
-              <h3 className="text-xl font-semibold text-[#100e06] mb-2">
+
+              <h3 className="text-2xl font-bold text-[#100e06] mb-3 relative z-10">
                 No Conversations Yet
               </h3>
-              <p className="text-[#100e06]/70 mb-6">
-                Start chatting with your matches to see your conversation
-                history here.
+              <p className="text-[#100e06]/60 mb-8 max-w-xs mx-auto leading-relaxed relative z-10">
+                Looks like you haven't started chatting yet. Find your perfect
+                roomie to get started!
               </p>
-              <Link
-                href="/match"
-                className="inline-flex items-center justify-center bg-[#d2b53b] hover:bg-[#d2b53b]/90 text-white px-6 py-3 rounded-xl font-medium transition-colors"
-              >
-                Find Matches
+
+              <Link href="/match" className="relative z-10 block">
+                <Button className="w-full bg-gradient-to-r from-[#d2b53b] to-[#ebd060] hover:opacity-90 text-white rounded-xl py-6 font-semibold shadow-lg hover:shadow-xl transition-all duration-300">
+                  Find Matches
+                </Button>
               </Link>
             </div>
-          </div>
+          </motion.div>
         ) : (
           <div className="max-w-2xl mx-auto">
-            {/* Stats Bar */}
-            <div className="bg-white/40 backdrop-blur-sm rounded-2xl p-4 border border-[#ebd98d]/30 mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-[#d2b53b] rounded-full flex items-center justify-center">
-                  <MessageCircle className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <p className="font-semibold text-[#100e06]">
-                    {users.length} Active{" "}
-                    {users.length === 1 ? "Conversation" : "Conversations"}
-                  </p>
-                  <p className="text-sm text-[#100e06]/70">
-                    Click on any chat to continue the conversation
-                  </p>
-                </div>
-              </div>
-            </div>
-
             {/* Chat List */}
-            <div className="space-y-3">
+            <motion.div
+              className="space-y-4"
+              initial="hidden"
+              animate="show"
+              variants={{
+                hidden: { opacity: 0 },
+                show: {
+                  opacity: 1,
+                  transition: {
+                    staggerChildren: 0.1,
+                  },
+                },
+              }}
+            >
               {users.map((user) => (
-                <div
+                <motion.div
                   key={user.id}
+                  variants={{
+                    hidden: { opacity: 0, y: 20 },
+                    show: { opacity: 1, y: 0 },
+                  }}
+                  whileHover={{ scale: 1.02, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => router.push(`/chat/${user.id}`)}
-                  className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 shadow-lg border border-[#ebd98d]/30 hover:border-[#d2b53b]/50 cursor-pointer transition-all duration-300 hover:shadow-xl group"
+                  className="bg-white/70 backdrop-blur-md rounded-2xl p-4 shadow-sm hover:shadow-xl border border-white/50 cursor-pointer transition-all duration-300 group relative overflow-hidden"
                 >
-                  <div className="flex items-center gap-4">
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#d2b53b]/0 via-[#d2b53b]/5 to-[#d2b53b]/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+
+                  <div className="flex items-center gap-5 relative z-10">
                     {/* Profile Image */}
-                    <div className="relative">
-                      <img
-                        src={
-                          user.image || "/placeholder.svg?height=60&width=60"
-                        }
-                        alt={user.name}
-                        className="w-14 h-14 rounded-full object-cover ring-2 ring-white shadow-md"
-                      />
+                    <div className="relative flex-shrink-0">
+                      <div className="p-0.5 rounded-full bg-gradient-to-tr from-[#d2b53b] to-[#ebd060] shadow-md">
+                        <img
+                          src={
+                            user.image || "/placeholder.svg?height=60&width=60"
+                          }
+                          alt={user.name}
+                          className="w-16 h-16 rounded-full object-cover border-2 border-white bg-white"
+                        />
+                      </div>
+                      {/* Online Status Dot (Simulated) */}
+                      <div className="absolute bottom-1 right-1 w-4 h-4 bg-[#d2b53b] border-2 border-white rounded-full" />
                     </div>
 
                     {/* Chat Info */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1">
-                        <h3 className="font-semibold text-[#100e06] group-hover:text-[#d2b53b] transition-colors truncate">
+                    <div className="flex-1 min-w-0 py-1">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <h3 className="text-lg font-bold text-[#100e06] group-hover:text-[#d2b53b] transition-colors truncate">
                           {user.name}
                         </h3>
                         {user.lastMessageTime && (
-                          <div className="flex items-center gap-1 text-xs text-[#100e06]/50">
+                          <div className="flex items-center gap-1.5 text-xs font-medium text-[#100e06]/40 bg-[#d2b53b]/10 px-2 py-1 rounded-full">
                             <Clock className="w-3 h-3" />
                             {user.lastMessageTime}
                           </div>
                         )}
                       </div>
-                      {user.lastMessage && (
-                        <p className="text-sm text-[#100e06]/70 truncate">
+
+                      {user.lastMessage ? (
+                        <p className="text-sm text-[#100e06]/70 truncate font-medium group-hover:text-[#100e06]/90 transition-colors">
                           {user.lastMessage}
                         </p>
-                      )}
-                      {!user.lastMessage && (
-                        <p className="text-sm text-[#100e06]/50 italic">
-                          Continue conversation...
+                      ) : (
+                        <p className="text-sm text-[#d2b53b] italic font-medium flex items-center gap-1">
+                          <MessageCircle className="w-3 h-3" />
+                          Start the conversation
                         </p>
                       )}
                     </div>
 
                     {/* Arrow Indicator */}
-                    <div className="text-[#d2b53b] group-hover:translate-x-1 transition-transform">
+                    <div className="text-[#d2b53b]/30 group-hover:text-[#d2b53b] group-hover:translate-x-1 transition-all">
                       <svg
-                        className="w-5 h-5"
+                        className="w-6 h-6"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -202,33 +247,34 @@ export default function ChatHistory() {
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          strokeWidth={2}
+                          strokeWidth={2.5}
                           d="M9 5l7 7-7 7"
                         />
                       </svg>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
 
             {/* Bottom CTA */}
-            <div className="text-center py-8">
-              <div className="bg-white/40 backdrop-blur-sm rounded-2xl p-6 border border-[#ebd98d]/30">
-                <h3 className="text-lg font-semibold text-[#100e06] mb-2">
-                  Want to meet more people?
-                </h3>
-                <p className="text-[#100e06]/70 mb-4">
-                  Discover more potential roommates and start new conversations.
-                </p>
-                <Link
-                  href="/match"
-                  className="inline-flex items-center justify-center bg-[#d2b53b] hover:bg-[#d2b53b]/90 text-white px-6 py-3 rounded-xl font-medium transition-colors"
-                >
-                  Find More Matches
-                </Link>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8 }}
+              className="text-center py-12"
+            >
+              <div
+                className="inline-block relative group cursor-pointer"
+                onClick={() => router.push("/match")}
+              >
+                <div className="absolute inset-0 bg-[#d2b53b]/20 blur-xl rounded-full group-hover:bg-[#d2b53b]/30 transition-colors" />
+                <div className="relative bg-white/50 backdrop-blur-sm rounded-full px-8 py-3 border border-[#d2b53b]/20 text-[#100e06]/80 font-medium group-hover:text-[#d2b53b] transition-colors shadow-sm flex items-center gap-2">
+                  <Users className="w-4 h-4" />
+                  Discover more roommates
+                </div>
               </div>
-            </div>
+            </motion.div>
           </div>
         )}
       </div>
