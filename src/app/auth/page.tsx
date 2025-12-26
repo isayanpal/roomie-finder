@@ -12,7 +12,6 @@ export default function Auth() {
       {/* Left Panel - Visual/Brand Area (Hidden on mobile/small screens for cleaner auth focus) */}
       <div className="hidden lg:flex w-1/2 items-center justify-center p-12 relative z-10">
         <div className="max-w-lg">
-          <div className="inline-block p-4 rounded-2xl bg-white/40 backdrop-blur-md mb-8 border border-white/50 shadow-sm"></div>
           <h1 className="text-5xl font-bold text-[#100e06] leading-tight mb-6">
             Find your perfect <span className="text-[#d2b53b]">roomie</span>{" "}
             today.
