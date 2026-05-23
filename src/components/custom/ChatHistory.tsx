@@ -3,6 +3,9 @@
 import { User } from "@/constants/interfaces";
 import { createClient } from "@/utils/supabase/client";
 import { motion } from "framer-motion";
+import Image from "next/image";
+
+const supabase = createClient();
 import { ArrowLeft, Clock, MessageCircle, Users } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -14,7 +17,6 @@ export default function ChatHistory() {
   const [loading, setLoading] = useState(true);
   const [loggedIn, setLoggedIn] = useState(false);
   const router = useRouter();
-  const supabase = createClient();
 
   useEffect(() => {
     const fetchChats = async () => {
@@ -198,11 +200,13 @@ export default function ChatHistory() {
                     {/* Profile Image */}
                     <div className="relative flex-shrink-0">
                       <div className="p-0.5 rounded-full bg-gradient-to-tr from-[#d2b53b] to-[#ebd060] shadow-md">
-                        <img
+                        <Image
                           src={
                             user.image || "/placeholder.svg?height=60&width=60"
                           }
                           alt={user.name}
+                          width={64}
+                          height={64}
                           className="w-16 h-16 rounded-full object-cover border-2 border-white bg-white"
                         />
                       </div>

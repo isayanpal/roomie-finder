@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { IoMdPerson } from "react-icons/io";
 import { MdCleaningServices } from "react-icons/md";
@@ -57,18 +57,23 @@ const itemVariants = {
   },
 };
 
+const supabase = createClient();
+
+const emptyForm: FormData = {
+  location: "",
+  gender: "",
+  occupation: "",
+  preferences: { cleanliness: "", nightOwl: "", smoker: "" },
+};
+
 export default function PreferencesPage() {
-  const supabase = createClient();
   const router = useRouter();
-  const [form, setForm] = useState<FormData>({
-    location: "",
-    gender: "",
-    occupation: "",
-    preferences: { cleanliness: "", nightOwl: "", smoker: "" },
-  });
+  const [form, setForm] = useState<FormData>(emptyForm);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const savedForm = useRef<FormData>(emptyForm);
 
   useEffect(() => {
     const loadPreferences = async () => {
@@ -84,7 +89,7 @@ export default function PreferencesPage() {
         const res = await fetch("/api/preferences");
         if (res.ok) {
           const p: FormData = await res.json();
-          setForm({
+          const loaded: FormData = {
             location: p.location || "",
             gender: p.gender || "",
             occupation: p.occupation || "",
@@ -93,7 +98,9 @@ export default function PreferencesPage() {
               nightOwl: p.preferences?.nightOwl || "",
               smoker: p.preferences?.smoker || "",
             },
-          });
+          };
+          setForm(loaded);
+          savedForm.current = loaded;
         } else if (res.status === 401) {
           setError("Session expired or unauthorized. Please log in again.");
           router.push("/auth");
@@ -151,6 +158,8 @@ export default function PreferencesPage() {
 
       if (res.ok) {
         toast.success("Preferences saved successfully!");
+        savedForm.current = form;
+        setIsEditing(false);
         router.push("/match");
       } else if (res.status === 401) {
         toast.error("Session expired or unauthorized. Please log in again.");
@@ -294,7 +303,8 @@ export default function PreferencesPage() {
                         handleInputChange("location", e.target.value)
                       }
                       placeholder="Where do you live?"
-                      className="h-12 bg-white/70 border-transparent focus:border-[#d2b53b]/50 focus:bg-white focus:ring-4 focus:ring-[#d2b53b]/10 rounded-2xl transition-all duration-300 font-medium text-[#100e06] placeholder:text-[#100e06]/30 shadow-sm group-hover:bg-white/90"
+                      disabled={!isEditing}
+                      className="h-12 bg-white/70 border-transparent focus:border-[#d2b53b]/50 focus:bg-white focus:ring-4 focus:ring-[#d2b53b]/10 rounded-2xl transition-all duration-300 font-medium text-[#100e06] placeholder:text-[#100e06]/30 shadow-sm group-hover:bg-white/90 disabled:opacity-60 disabled:cursor-not-allowed"
                     />
                   </div>
                 </div>
@@ -311,6 +321,7 @@ export default function PreferencesPage() {
                     onValueChange={(value) =>
                       handleInputChange("gender", value)
                     }
+                    disabled={!isEditing}
                   >
                     <SelectTrigger className="h-12 bg-white/70 border-transparent focus:border-[#d2b53b]/50 focus:ring-4 focus:ring-[#d2b53b]/10 rounded-2xl transition-all duration-300 font-medium text-[#100e06] shadow-sm hover:bg-white/90 data-[state=open]:bg-white">
                       <SelectValue placeholder="Select..." />
@@ -349,7 +360,8 @@ export default function PreferencesPage() {
                       handleInputChange("occupation", e.target.value)
                     }
                     placeholder="e.g. Graphic Designer"
-                    className="h-12 bg-white/70 border-transparent focus:border-[#d2b53b]/50 focus:bg-white focus:ring-4 focus:ring-[#d2b53b]/10 rounded-2xl transition-all duration-300 font-medium text-[#100e06] placeholder:text-[#100e06]/30 shadow-sm hover:bg-white/90"
+                    disabled={!isEditing}
+                    className="h-12 bg-white/70 border-transparent focus:border-[#d2b53b]/50 focus:bg-white focus:ring-4 focus:ring-[#d2b53b]/10 rounded-2xl transition-all duration-300 font-medium text-[#100e06] placeholder:text-[#100e06]/30 shadow-sm hover:bg-white/90 disabled:opacity-60 disabled:cursor-not-allowed"
                   />
                 </div>
               </div>
@@ -377,6 +389,7 @@ export default function PreferencesPage() {
                     onValueChange={(value) =>
                       handleInputChange("cleanliness", value)
                     }
+                    disabled={!isEditing}
                   >
                     <SelectTrigger className="h-12 bg-white/70 border-transparent focus:border-[#d2b53b]/50 focus:ring-4 focus:ring-[#d2b53b]/10 rounded-2xl transition-all duration-300 font-medium text-[#100e06] shadow-sm hover:bg-white/90">
                       <SelectValue placeholder="Select..." />
@@ -411,6 +424,7 @@ export default function PreferencesPage() {
                     onValueChange={(value) =>
                       handleInputChange("nightOwl", value)
                     }
+                    disabled={!isEditing}
                   >
                     <SelectTrigger className="h-12 bg-white/70 border-transparent focus:border-[#d2b53b]/50 focus:ring-4 focus:ring-[#d2b53b]/10 rounded-2xl transition-all duration-300 font-medium text-[#100e06] shadow-sm hover:bg-white/90">
                       <SelectValue placeholder="Select..." />
@@ -444,6 +458,7 @@ export default function PreferencesPage() {
                     onValueChange={(value) =>
                       handleInputChange("smoker", value)
                     }
+                    disabled={!isEditing}
                   >
                     <SelectTrigger className="h-12 bg-white/70 border-transparent focus:border-[#d2b53b]/50 focus:ring-4 focus:ring-[#d2b53b]/10 rounded-2xl transition-all duration-300 font-medium text-[#100e06] shadow-sm hover:bg-white/90">
                       <SelectValue placeholder="Select..." />
@@ -468,11 +483,31 @@ export default function PreferencesPage() {
             </div>
 
             {/* Action Buttons */}
-            <div className="pt-6">
+            <div className="pt-6 flex flex-col gap-3">
+              {isEditing ? (
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setForm(savedForm.current);
+                    setIsEditing(false);
+                  }}
+                  className="w-full h-12 bg-white hover:bg-[#fbf9f1] text-[#100e06] border-2 border-[#ebd98d] rounded-2xl text-base font-semibold transition-all duration-300"
+                >
+                  Cancel
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  onClick={() => setIsEditing(true)}
+                  className="w-full h-12 bg-white hover:bg-[#fbf9f1] text-[#100e06] border-2 border-[#d2b53b] rounded-2xl text-base font-semibold transition-all duration-300"
+                >
+                  Click to Edit
+                </Button>
+              )}
               <Button
                 type="submit"
-                disabled={saving}
-                className="w-full h-14 bg-[#d2b53b] hover:bg-[#bfa330] text-white rounded-2xl text-lg font-bold shadow-lg shadow-[#d2b53b]/25 transition-all duration-300 hover:scale-[1.01] hover:shadow-xl relative overflow-hidden group"
+                disabled={saving || !isEditing}
+                className="w-full h-14 bg-[#d2b53b] hover:bg-[#bfa330] text-white rounded-2xl text-lg font-bold shadow-lg shadow-[#d2b53b]/25 transition-all duration-300 hover:scale-[1.01] hover:shadow-xl relative overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               >
                 <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 pointer-events-none" />
                 {saving ? (

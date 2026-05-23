@@ -8,18 +8,18 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const otherUserId = searchParams.get("otherUserId");
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!session || !otherUserId) {
+  if (!user || !otherUserId) {
     return NextResponse.json([], { status: 401 });
   }
 
   const messages = await prisma.message.findMany({
     where: {
       OR: [
-        { senderId: session.user.id, receiverId: otherUserId },
-        { senderId: otherUserId, receiverId: session.user.id },
+        { senderId: user.id, receiverId: otherUserId },
+        { senderId: otherUserId, receiverId: user.id },
       ],
     },
     orderBy: { createdAt: "asc" },
@@ -32,10 +32,10 @@ export async function POST(req: Request) {
   const supabase = await createClient();
   const body = await req.json();
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!session) {
+  if (!user) {
     return NextResponse.json(null, { status: 401 });
   }
 
@@ -47,7 +47,7 @@ export async function POST(req: Request) {
       await prisma.message.updateMany({
         where: {
           senderId: otherUserId,
-          receiverId: session.user.id,
+          receiverId: user.id,
           read: false,
         },
         data: { read: true },
@@ -66,7 +66,7 @@ export async function POST(req: Request) {
     try {
       const newMessage = await prisma.message.create({
         data: {
-          senderId: session.user.id, // The authenticated user is the sender
+          senderId: user.id,
           receiverId: receiverId,
           content: content,
           read: false, // New messages are initially unread

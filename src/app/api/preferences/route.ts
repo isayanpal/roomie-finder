@@ -6,12 +6,12 @@ export async function GET() {
   const supabase = await createClient();
 
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  if (!session) return NextResponse.json(null, { status: 401 });
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json(null, { status: 401 });
   const pref = await prisma.preference.findUnique({
     where: {
-      userId: session.user.id,
+      userId: user.id,
     },
     include: { user: { select: { name: true, image: true } } },
   });
@@ -56,13 +56,13 @@ export async function POST(req: Request) {
 
   const { location, gender, occupation, preferences } = await req.json();
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  if (!session) return NextResponse.json(null, { status: 401 });
+    data: { user: authUser },
+  } = await supabase.auth.getUser();
+  if (!authUser) return NextResponse.json(null, { status: 401 });
 
   // Fetch the user's name and image from the User model
   const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
+    where: { id: authUser.id },
     select: { name: true, image: true },
   });
 
@@ -71,7 +71,7 @@ export async function POST(req: Request) {
   }
 
   const p = await prisma.preference.upsert({
-    where: { userId: session.user.id },
+    where: { userId: authUser.id },
     update: {
       location,
       gender,
@@ -81,7 +81,7 @@ export async function POST(req: Request) {
       userImage: user.image ?? "",
     },
     create: {
-      userId: session.user.id,
+      userId: authUser.id,
       location,
       gender,
       occupation,

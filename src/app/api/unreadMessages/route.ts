@@ -16,16 +16,17 @@ export async function GET() {
     _count: { senderId: true },
   });
 
-  const result = await Promise.all(
-    groups.map(async (g) => {
-      const u = await prisma.user.findUnique({ where: { id: g.senderId } });
-      return {
-        senderId: g.senderId,
-        count: g._count.senderId,
-        senderName: u?.name || "Unknown",
-      };
-    })
-  );
+  const senderIds = groups.map((g) => g.senderId);
+  const users = await prisma.user.findMany({
+    where: { id: { in: senderIds } },
+    select: { id: true, name: true },
+  });
+  const userMap = Object.fromEntries(users.map((u) => [u.id, u.name]));
+  const result = groups.map((g) => ({
+    senderId: g.senderId,
+    count: g._count.senderId,
+    senderName: userMap[g.senderId] || "Unknown",
+  }));
 
   return NextResponse.json(result);
 }

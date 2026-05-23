@@ -6,31 +6,32 @@ import prisma from "@/lib/prisma";
 export async function GET() {
   const supabase = await createClient();
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!session) {
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const userId = session.user.id;
+  const userId = user.id;
 
-  // Get unique users the current user has chatted with (sent or received)
-  const messages = await prisma.message.findMany({
-    where: {
-      OR: [{ senderId: userId }, { receiverId: userId }],
-    },
-    select: {
-      senderId: true,
-      receiverId: true,
-    },
-  });
+  const [senders, receivers] = await Promise.all([
+    prisma.message.findMany({
+      where: { receiverId: userId },
+      select: { senderId: true },
+      distinct: ["senderId"],
+    }),
+    prisma.message.findMany({
+      where: { senderId: userId },
+      select: { receiverId: true },
+      distinct: ["receiverId"],
+    }),
+  ]);
 
-  const userIds = new Set<string>();
-  messages.forEach((msg) => {
-    if (msg.senderId !== userId) userIds.add(msg.senderId);
-    if (msg.receiverId !== userId) userIds.add(msg.receiverId);
-  });
+  const userIds = new Set<string>([
+    ...senders.map((m) => m.senderId),
+    ...receivers.map((m) => m.receiverId),
+  ]);
 
   const users = await prisma.user.findMany({
     where: {
