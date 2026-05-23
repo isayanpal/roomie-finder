@@ -4,6 +4,9 @@ import { MatchCard } from "@/components/custom/MatchCard";
 import { NumberTicker } from "@/components/magicui/number-ticker";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/utils/supabase/client";
+
+const supabase = createClient();
+
 import {
   ArrowLeft,
   ChevronLeft,
@@ -24,8 +27,6 @@ import toast from "react-hot-toast";
 const ITEMS_PER_PAGE = 6;
 
 export default function MatchPage() {
-  const supabase = createClient();
-
   const [matches, setMatches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -52,25 +53,26 @@ export default function MatchPage() {
           return;
         }
 
-        const prefRes = await fetch("/api/preferences");
+        const [prefRes, matchesRes] = await Promise.all([
+          fetch("/api/preferences"),
+          fetch("/api/matches"),
+        ]);
+
         if (!prefRes.ok) {
-          // If 404, maybe user hasn't set preferences?
-          if (prefRes.status === 404) {
-            // Handle gracefully if needed
-          }
           throw new Error(
             `Failed to fetch preferences: ${prefRes.status} ${prefRes.statusText}`
           );
         }
-        const pref = await prefRes.json();
-
-        const matchesRes = await fetch("/api/matches");
         if (!matchesRes.ok) {
           throw new Error(
             `Failed to fetch matches: ${matchesRes.status} ${matchesRes.statusText}`
           );
         }
-        const others = await matchesRes.json();
+
+        const [pref, others] = await Promise.all([
+          prefRes.json(),
+          matchesRes.json(),
+        ]);
 
         if (!Array.isArray(others)) {
           throw new Error("API /api/matches did not return an array.");
@@ -105,7 +107,7 @@ export default function MatchPage() {
         setLoading(false);
       }
     })();
-  }, [supabase]);
+  }, []);
 
   useEffect(() => {
     const fetchUsers = async () => {
