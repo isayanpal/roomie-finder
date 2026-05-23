@@ -4,14 +4,16 @@ import type React from "react";
 
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/utils/supabase/client";
+import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Send } from "lucide-react";
 
+const supabase = createClient();
+
 export default function ChatRoom() {
-  const supabase = createClient();
   const { id: otherId } = useParams();
   const [msgs, setMsgs] = useState<any[]>([]);
   const [input, setInput] = useState("");
@@ -22,72 +24,65 @@ export default function ChatRoom() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
+  // Auth, initial data load, mark-read — runs once per otherId
   useEffect(() => {
     (async () => {
       try {
-        // setIsLoading(true)
         const {
           data: { user },
         } = await supabase.auth.getUser();
         if (!user) {
           router.push("/auth");
+          return;
         }
-        if (!user) return;
         setMe(user.id);
 
-        // Fetch other user details
-        const userRes = await fetch(`/api/user/${otherId}`);
-        if (userRes.ok) {
-          const userData = await userRes.json();
-          setOtherUser(userData);
-        }
+        const [userRes, , msgsRes] = await Promise.all([
+          fetch(`/api/user/${otherId}`),
+          fetch(`/api/messages`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ markRead: true, otherUserId: otherId }),
+          }),
+          fetch(`/api/messages?otherUserId=${otherId}`),
+        ]);
 
-        // Mark messages as read
-        await fetch(`/api/messages`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ markRead: true, otherUserId: otherId }),
-        });
-
-        // Load initial messages
-        const res = await fetch(`/api/messages?otherUserId=${otherId}`);
-        const initialMsgs = await res.json();
-        setMsgs(initialMsgs);
-
-        // Subscribe to real-time messages
-        const channel = supabase
-          .channel("msgs")
-          .on(
-            "postgres_changes",
-            { event: "INSERT", schema: "public", table: "Message" },
-            (payload) => {
-              const m = payload.new;
-
-              // Check if this message belongs to this chat
-              if (
-                (m.senderId === user.id && m.receiverId === otherId) ||
-                (m.senderId === otherId && m.receiverId === user.id)
-              ) {
-                setMsgs((prev) => {
-                  // Check if the message ID already exists in the list
-                  if (prev.some((msg) => msg.id === m.id)) {
-                    return prev; // Message already exists
-                  }
-                  return [...prev, m]; // Add new message
-                });
-              }
-            }
-          )
-          .subscribe();
-
-        return () => {
-          supabase.removeChannel(channel);
-        };
+        if (userRes.ok) setOtherUser(await userRes.json());
+        if (msgsRes.ok) setMsgs(await msgsRes.json());
       } catch (error) {
         console.log("Error in chat initialization:", error);
       }
     })();
-  }, [otherId, supabase, msgs]);
+  }, [otherId]);
+
+  // Realtime subscription — runs once per otherId+me, no msgs dep
+  useEffect(() => {
+    if (!me) return;
+
+    const channel = supabase
+      .channel(`msgs-${otherId}-${me}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "Message" },
+        (payload) => {
+          const m = payload.new;
+          if (
+            (m.senderId === me && m.receiverId === otherId) ||
+            (m.senderId === otherId && m.receiverId === me)
+          ) {
+            setMsgs((prev) => {
+              if (prev.some((msg) => msg.id === m.id)) return prev;
+              return [...prev, m];
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [otherId, me]);
 
   useEffect(() => {
     const container = bottomRef.current?.parentElement;
@@ -117,7 +112,13 @@ export default function ChatRoom() {
         }),
       });
 
-      if (!res.ok) {
+      if (res.ok) {
+        const newMessage = await res.json();
+        // Add immediately — don't rely on realtime firing for sender's own INSERT
+        setMsgs((prev) =>
+          prev.some((m) => m.id === newMessage.id) ? prev : [...prev, newMessage]
+        );
+      } else {
         const errorData = await res.json();
         console.error("Failed to send message:", errorData);
       }
@@ -167,9 +168,11 @@ export default function ChatRoom() {
                 </p>
               </div>
               <div className="relative">
-                <img
+                <Image
                   src={otherUser.image}
                   alt={otherUser.name}
+                  width={32}
+                  height={32}
                   className="w-8 h-8 rounded-full object-cover ring-2 ring-white"
                 />
               </div>
@@ -184,13 +187,7 @@ export default function ChatRoom() {
           className="flex-1 overflow-y-auto p-4 bg-[#fbf9f1]/50"
         >
           <AnimatePresence initial={false}>
-            {msgs
-              .sort(
-                (a, b) =>
-                  new Date(a.created_at).getTime() -
-                  new Date(b.created_at).getTime()
-              )
-              .map((m, index) => (
+            {msgs.map((m, index) => (
                 <motion.div
                   key={m.id}
                   initial={{ opacity: 0, y: 10, scale: 0.95 }}
