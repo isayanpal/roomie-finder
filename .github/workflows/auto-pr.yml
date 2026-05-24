@@ -1,0 +1,58 @@
+name: Auto PR development → master
+
+on:
+  push:
+    branches:
+      - development
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create or update PR
+        id: create-pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Collect commits on development not yet in master
+          COMMITS=$(git log origin/master..HEAD --pretty=format:"- %s (%h)" | head -20)
+
+          BODY="## Changes
+
+          ${COMMITS}
+
+          ---
+          Automated PR: \`development\` → \`master\`"
+
+          # Check if PR already exists
+          EXISTING_PR=$(gh pr list \
+            --base master \
+            --head development \
+            --state open \
+            --json number \
+            --jq '.[0].number')
+
+          if [ -n "$EXISTING_PR" ]; then
+            gh pr edit "$EXISTING_PR" --body "$BODY"
+            echo "Updated PR #$EXISTING_PR"
+            echo "pr_number=$EXISTING_PR" >> $GITHUB_OUTPUT
+          else
+            PR_URL=$(gh pr create \
+              --base master \
+              --head development \
+              --title "chore: merge development into master" \
+              --body "$BODY")
+
+            PR_NUMBER=$(echo "$PR_URL" | grep -o '[0-9]*$')
+            echo "Created PR #$PR_NUMBER"
+            echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
+          fi
